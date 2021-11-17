@@ -1,8 +1,8 @@
 # Squirminal
 
-A lightweight web component helper for HTML5 videos. Intended for use with `muted` by default HTML5 videos.
+The squirminal is a fake antique terminal web component 
 
-* [Demo](https://zachleat.github.io/video-radio-star/demo.html)
+* [Demo](https://zachleat.github.io/squirminal/demo.html)
 
 
 <!--
