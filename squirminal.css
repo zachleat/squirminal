@@ -1,0 +1,25 @@
+@keyframes squirminal-blink {
+	0% {
+		background-color: var(--sq-cursor);
+	}
+	100% {
+		background-color: transparent;
+	}
+}
+
+squirm-inal {
+  --sq-cursor: #30c8c9;
+  display: inline;
+  white-space: pre-wrap;
+  font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+}
+.squirminal-cursor-show:after {
+  content: '';
+  display: inline-block;
+  width: 0.7em;
+  height: 1.4em;
+  margin-left: 0.2em;
+  background-color: var(--sq-cursor);
+  vertical-align: text-top;
+  animation: squirminal-blink 1s infinite steps(2, start);
+}

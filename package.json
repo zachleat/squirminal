@@ -1,0 +1,26 @@
+{
+  "name": "@zachleat/squirminal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "squirminal.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachleat/squirminal.git"
+  },
+  "author": {
+    "name": "Zach Leatherman",
+    "email": "zachleatherman@gmail.com",
+    "url": "https://zachleat.com/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zachleat/squirminal/issues"
+  },
+  "homepage": "https://github.com/zachleat/squirminal#readme"
+}
