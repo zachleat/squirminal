@@ -2,7 +2,7 @@
 
 The squirminal is a fake antique terminal web component 
 
-* [Demo](https://zachleat.github.io/squirminal/demo.html)
+* [Demo](https://squirminal.zachleat.dev/)
 
 
 <!--
@@ -27,9 +27,11 @@ npm install @zachleat/squirminal
 
 ## Features
 
-* `<squirm-inal cursor>`
-* `<squirm-inal autoplay>`
-* Adds a button (for mobile)
+* Works with `prefers-reduced-motion`
+* Works without JavaScript (shows content)
+* Blinking cursor via `<squirm-inal cursor>`
+* Autoplay via `<squirm-inal autoplay>`
+* Play/pause/reset button
 * TODO: keyboard activation
 
 ## Credits
