@@ -24,7 +24,7 @@ class Squirminal extends HTMLElement {
     };
 
     this.paused = true;
-    this.originalText = this.innerText;
+    this.originalText = this.innerText.trim();
     this.queue = this.originalText.split("");
 
     this.init();

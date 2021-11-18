@@ -13,13 +13,16 @@ squirm-inal {
   white-space: pre-wrap;
   font-family: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
 }
-.squirminal-cursor-show:after {
+.squirminal-content {
+  line-height: 1.4;
+}
+.squirminal-cursor-show .squirminal-content:after {
   content: '';
   display: inline-block;
   width: 0.7em;
-  height: 1.4em;
+  height: 1.2em;
   margin-left: 0.2em;
   background-color: var(--sq-cursor);
-  vertical-align: text-top;
+  vertical-align: text-bottom;
   animation: squirminal-blink 1s infinite steps(2, start);
 }
