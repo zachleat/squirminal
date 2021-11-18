@@ -1,6 +1,6 @@
 class Squirminal extends HTMLElement {
   connectedCallback() {
-    // reduce motion
+    // quit early when reduced motion
     if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -9,7 +9,8 @@ class Squirminal extends HTMLElement {
     this.chunkSize = {
       min: 20,
       max: 60
-    };;
+    };
+
     this.attr = {
       cursor: "cursor",
       autoplay: "autoplay",
@@ -45,18 +46,23 @@ class Squirminal extends HTMLElement {
     // clear it out
     this.innerHTML = "";
 
-    // Add button
-    let btn = document.createElement("button");
-    btn.innerText = "Play";
-    btn.addEventListener("click", e => {
-      if(!this.queue.length) {
-        this.reset();
-      } else {
-        this.toggle();
-      }
+    // Play/pause button
+    let playBtn = document.createElement("button");
+    playBtn.innerText = "Play";
+    playBtn.addEventListener("click", e => {
+      this.toggle();
     })
-    this.appendChild(btn);
-    this.playButton = btn;
+    this.appendChild(playBtn);
+    this.playButton = playBtn;
+
+    // Reset button
+    let resetBtn = document.createElement("button");
+    resetBtn.innerText = "Reset";
+    resetBtn.addEventListener("click", e => {
+      this.reset();
+    });
+    this.appendChild(resetBtn);
+    this.resetButton = resetBtn;
 
     // Add content div
     let content = document.createElement("div");
@@ -99,6 +105,10 @@ class Squirminal extends HTMLElement {
 
   play() {
     this.paused = false;
+    if(this.queue.length) {
+      this.playButton.innerText = "Pause";
+    }
+
     requestAnimationFrame(() => this.showMore());
   }
 
@@ -108,12 +118,10 @@ class Squirminal extends HTMLElement {
     }
 
     if(!this.queue.length) {
-      this.playButton.innerText = "Reset";
-      return;
+      this.pause();
     }
 
-    this.playButton.innerText = "Pause";
-
+    // show a random chunk size between min/max
     let add = [];
     let chunkSize = Math.round(Math.max(this.chunkSize.min, Math.random() * this.chunkSize.max + 1));
     for(let j = 0, k = chunkSize; j<k; j++) {
