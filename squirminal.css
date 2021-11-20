@@ -27,8 +27,8 @@ squirm-inal {
 }
 .squirminal-content {
   line-height: 1.4;
-  /* scroll-padding-top: 4em; */
 }
+/* Cursor */
 .squirminal-cursor-show .squirminal-content:after {
   content: '';
   display: inline-block;
@@ -42,6 +42,13 @@ squirm-inal {
 
 squirm-inal-form {
   font-family: var(--sq-font);
+}
+.js squirm-inal-form {
+  display: none;
+}
+.js squirm-inal-form.active,
+.js squirm-inal-form[autofocus] {
+  display: block;
 }
 squirm-inal-form label {
   display: flex;
@@ -59,4 +66,18 @@ squirm-inal-form input {
   margin-left: .2em;
   /* outline: none; */
   border: 1px solid;
+}
+squirm-inal-form input[readonly] {
+  border: none;
+}
+squirm-inal-form form.command-running {
+  visibility: hidden;
+}
+squirm-inal-form label:before {
+  content: ">";
+  font-weight: bold;
+  font-family: system-ui, sans-serif;
+  color: #32c8c9;
+  display: inline-block;
+  margin-right: .5em;
 }

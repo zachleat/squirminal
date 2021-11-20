@@ -1,7 +1,10 @@
+
 body {
 	font-family: -apple-system, system-ui, sans-serif;
 	max-width: 60em;
 	margin: 0 auto;
 	background: #151A1E;
 	color: #fff;
+	overflow-y: scroll;
+	overflow-anchor: none;
 }

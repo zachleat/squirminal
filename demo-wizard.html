@@ -15,14 +15,18 @@
 		<h1><code>squirminal</code> Wizard Demo</h1>
 		<p>Go back to the <a href="https://github.com/zachleat/squirminal/">repository on GitHub</a>.</p>
 
-		<squirm-inal-form label="Continue? (Y/N/help)" target="#wizard-q1" target-fallback="#wizard" target-invalid="#wizard-invalid"></squirm-inal-form>
+		<div>
+			<squirm-inal-form autofocus label="Question 1: Continue? (Y/N/help)" target="#wizard-q1" target-fallback="#wizard" target-invalid="#wizard-invalid"></squirm-inal-form>
 
-		<squirm-inal-form label="Continue? (Y/N/help)" target="#wizard-q2" target-fallback="#wizard" target-invalid="#wizard-invalid"></squirm-inal-form>
+			<squirm-inal-form label="Question 2: Can you press enter? (Press enter)" target="#wizard-q2" target-fallback="#wizard" target-invalid="#wizard-invalid"></squirm-inal-form>
 
-		<squirm-inal-form label="Continue? (Y/N/help)" target="#wizard-q3"></squirm-inal-form>
+			<squirm-inal-form label="Question 3: Continue? (Y/N/help)" target="#wizard-q3"></squirm-inal-form>
+
+			<squirm-inal-form label="This is the end."></squirm-inal-form>
+		</div>
 
 		<!-- global squirminals -->
-		<squirm-inal clone id="wizard-help">
+		<squirm-inal clone id="wizard-help" cursor>
 Netlify command line tool
 
 VERSION
@@ -69,9 +73,9 @@ COMMANDS
   watch       Watch for site deploy to finish
 		</squirm-inal>
 
-		<squirm-inal clone id="wizard-version">{{ project.name }}/{{ project.version }} {{ process.env._system_arch }} node-v{{ process.env.NODE_VERSION }}</squirm-inal>
+		<squirm-inal clone id="wizard-version">{{ project.name }}/{{ project.version }} {{ process.env._system_arch }} node-v{{ process.env.NODE_VERSION }}</squirm-inal cursor>
 
-		<squirm-inal clone id="wizard-invalid">command not found. Maybe try `help`?</squirm-inal>
+		<squirm-inal clone id="wizard-invalid">command not found. Maybe try `help`?</squirm-inal cursor>
 
 		<!-- Question 1 -->
 		<squirm-inal id="wizard-q1-y">
@@ -83,6 +87,10 @@ COMMANDS
 [2021-11-17T23:41:41.964Z]  "GET /demo.js" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0"
 [2021-11-17T23:41:41.964Z]  "GET /squirminal.css" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0"
 [2021-11-17T23:41:41.979Z]  "GET /favicon.ico" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:94.0) Gecko/20100101 Firefox/94.0"
+		</squirm-inal>
+
+		<squirm-inal id="wizard-q1-n">
+		No
 		</squirm-inal>
 
 		<!-- Question 2 -->
@@ -100,6 +108,7 @@ COMMANDS
 		<!-- Question 3 -->
 		<squirm-inal id="wizard-q3-y">You typed y.</squirm-inal>
 		<squirm-inal id="wizard-q3-n">You typed n.</squirm-inal>
+		<!-- Question 3 specific help -->
 		<squirm-inal id="wizard-q3-help">You typed help.</squirm-inal>
 
 		<script type="module" src="squirminal.js"></script>

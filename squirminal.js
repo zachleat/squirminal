@@ -21,6 +21,7 @@ class Squirminal extends HTMLElement {
     this.events = {
       start: "squirminal.start",
       end: "squirminal.end",
+      frameAdded: "squirminal.frameadded",
     };
   }
 
@@ -30,11 +31,10 @@ class Squirminal extends HTMLElement {
       return;
     }
 
-    this.paused = true;
-    this.originalText = this.innerText.trim();
-    this.queue = this.originalText.split("");
+    let originalText = this.innerText;
 
     this.init();
+    this.setupProps(originalText);
 
     if(this.hasAttribute(this.attr.autoplay)) {
       this._whenVisible(this, (isVisible) => {
@@ -43,53 +43,58 @@ class Squirminal extends HTMLElement {
         }
       });
     }
+
+    if(this.hasAttribute(this.attr.cursor)) {
+      this.addEventListener("squirminal.start", () => {
+        this.classList.add(this.classes.showCursor);
+      });
+
+      this.addEventListener("squirminal.end", () => {
+        this.classList.remove(this.classes.showCursor);
+      });
+    }
+  }
+
+  setupProps(text) {
+    this.paused = true;
+    this.originalText = text.trim();
+    this.queue = this.originalText.split("");
+
+    this.toggleButton = this.querySelector(":scope button");
+    this.content = this.querySelector(`.${this.classes.content}`);
+  }
+
+  reset() {
+    this.paused = true;
+    this.setButtonText(this.toggleButton, "Play");
+    this.queue = this.originalText.split("");
+    this.content.innerHTML = "";
   }
 
   init() {
-    // add classes
-    this.classList.toggle(this.classes.showCursor, this.hasAttribute(this.attr.cursor));
-
     // clear it out
     this.innerHTML = "";
 
     // Play/pause button
     if(this.hasAttribute(this.attr.buttons)) {
-      let playBtn = document.createElement("button");
-      playBtn.innerText = "Play";
-      playBtn.addEventListener("click", e => {
+      let toggleBtn = document.createElement("button");
+      toggleBtn.innerText = "Play";
+      toggleBtn.addEventListener("click", e => {
         this.toggle();
       })
-      this.appendChild(playBtn);
-      this.playButton = playBtn;
-  
-      // Reset button
-      let resetBtn = document.createElement("button");
-      resetBtn.innerText = "Reset";
-      resetBtn.addEventListener("click", e => {
-        this.reset();
-      });
-      this.appendChild(resetBtn);
-      this.resetButton = resetBtn;
+      this.appendChild(toggleBtn);
     }
 
     // Add content div
     let content = document.createElement("div");
     content.classList.add(this.classes.content);
     this.appendChild(content);
-    this.content = content;
   }
 
   setButtonText(button, text) {
     if(button && text) {
       button.innerText = text;
     }
-  }
-
-  reset() {
-    this.paused = true;
-    this.setButtonText(this.playButton, "Play");
-    this.content.innerHTML = "";
-    this.queue = this.originalText.split("");
   }
 
   _whenVisible(el, callback) {
@@ -114,13 +119,14 @@ class Squirminal extends HTMLElement {
 
   pause() {
     this.paused = true;
-    this.setButtonText(this.playButton, "Play");
+    this.setButtonText(this.toggleButton, "Play");
   }
 
   play() {
     this.paused = false;
     if(this.queue.length) {
-      this.setButtonText(this.playButton, "Pause");
+      this.setButtonText(this.toggleButton, "Pause");
+      this.dispatchEvent(new CustomEvent(this.events.start));
     }
 
     requestAnimationFrame(() => this.showMore());
@@ -133,7 +139,7 @@ class Squirminal extends HTMLElement {
 
     if(!this.queue.length) {
       this.pause();
-      this.dispatchEvent(new CustomEvent("squirminal.finish"));
+      this.dispatchEvent(new CustomEvent(this.events.end));
     }
 
     // show a random chunk size between min/max
@@ -147,7 +153,7 @@ class Squirminal extends HTMLElement {
     let strAdded = add.join("");
     this.content.appendChild(document.createTextNode(strAdded));
 
-    this.dispatchEvent(new CustomEvent("squirminal.frameadded"));
+    this.dispatchEvent(new CustomEvent(this.events.frameAdded));
 
     // the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
     let nonwhitespaceCharacters = strAdded.replace(/\s/gi, "");
@@ -167,48 +173,36 @@ class Squirminal extends HTMLElement {
 }
 
 class SquirminalForm extends HTMLElement {
+  constructor() {
+    super();
+    this.attr = {
+      autofocus: "autofocus",
+      target: "target",
+      fallback: "target-fallback",
+      invalid: "target-invalid",
+    };
+  }
+
   connectedCallback() {
-    this.addForm();
+    this.setupProps();
+
+    if(!this.form) {
+      this.addForm();
+    }
+
+    if(this.commandInput && this.hasAttribute(this.attr.autofocus)) {
+      this.commandInput.focus();
+    }
 
     this.form.addEventListener("submit", e => {
       e.preventDefault();
       this.playTarget();
     });
   }
-
-  playTarget() {
-    let value = (this.command.value || "").toLowerCase();
-    let valueSuffix = (value ? `-${value}` : "");
-
-    let targetSelector = this.getAttribute("target");    
-    let terminal = document.querySelector(targetSelector + valueSuffix);
-
-    let targetFallbackSelector = this.getAttribute("target-fallback");
-    if(!terminal && targetFallbackSelector) {
-      terminal = document.querySelector(targetFallbackSelector + valueSuffix);
-    }
-
-    let targetInvalidSelector = this.getAttribute("target-invalid");
-    if(!terminal && value && targetInvalidSelector) {
-      terminal = document.querySelector(targetInvalidSelector);
-    }
-
-    if(!terminal) {
-      return;
-    }
-
-    let cloned = terminal.clone();
-    if(cloned) {
-      this.parentNode.insertBefore(cloned, this);
-      cloned.play();
-      cloned.addEventListener("squirminal.frameadded", () => {
-        this.form.scrollIntoView();
-      })
-    }
-  }
-
+  
   addForm() {
     let form = document.createElement("form");
+    this.form = form;
     
     let label = document.createElement("label");
     let labelText = this.getAttribute("label");
@@ -218,13 +212,118 @@ class SquirminalForm extends HTMLElement {
     label.appendChild(document.createTextNode(labelText));
     form.appendChild(label);
 
-    let command = document.createElement("input");
-    label.appendChild(command);
+    if(this.hasAttribute(this.attr.target)) {
+      let command = document.createElement("input");
+      this.commandInput = command;
+
+      label.appendChild(command);
+    }
     
     this.appendChild(form);
+  }
+
+  setupProps() {
+    this.form = this.querySelector(":scope form");
+    this.commandInput = this.querySelector(":scope input");
+  }
+
+  clone() {
+    let cloned = this.cloneNode();
+    cloned.setupProps();
+
+    return cloned;
+  }
+
+  on(el, name, fn) {
+    el.addEventListener(name, fn, {
+      passive: true,
+    })
+  }
+
+  playTarget() {
+    let value = (this.commandInput.value || "").toLowerCase();
+    let valueSuffix = (value ? `-${value}` : "");
     
-    this.form = form;
-    this.command = command;
+    let targetSelector = this.getAttribute(this.attr.target);
+    let terminal = document.querySelector(targetSelector + valueSuffix);
+
+    // if a fallback or invalid selector matches, we don’t move to the next question.
+    let isFirstChoiceCommand = !!terminal;
+    console.log( { isFirstChoiceCommand } );
+    let targetFallbackSelector = this.getAttribute(this.attr.fallback);
+    if(!terminal && targetFallbackSelector) {
+      terminal = document.querySelector(targetFallbackSelector + valueSuffix);
+    }
+
+    let targetInvalidSelector = this.getAttribute(this.attr.invalid);
+    if(!terminal && value && targetInvalidSelector) {
+      terminal = document.querySelector(targetInvalidSelector);
+    }
+
+    if(!terminal) {
+      return;
+    }
+
+    let cloned = terminal.clone();
+
+    if(cloned) {
+      let nextForm = this.findNextForm(this);
+      // TODO if no nextForm, we’re at the end.
+      nextForm.parentNode.insertBefore(cloned, nextForm);
+      cloned.play();
+
+      // blur on the old question
+      if(document.activeElement) {
+        document.activeElement.blur();
+      }
+
+      let nextInput;
+      if(isFirstChoiceCommand) {
+        nextForm.classList.add("active");
+
+        // Move to next question  
+        nextInput = nextForm.querySelector(":scope input");
+      } else {
+        // Keep the current question active
+        let clonedForm = this.clone();
+        this.parentNode.insertBefore(clonedForm, nextForm);
+        nextInput = clonedForm.querySelector(":scope input");
+      }
+
+      // after clone
+      this.commandInput.setAttribute("readonly", "readonly");
+
+      if(nextInput) {
+        cloned.addEventListener("squirminal.frameadded", () => {
+          nextInput.scrollIntoView();
+        }, {
+          passive: true,
+        });
+
+        cloned.addEventListener("squirminal.end", () => {
+          // TODO get rid of this
+          setTimeout(() => {
+            nextInput.focus();
+          }, 100);
+        }, {
+          once: true,
+          passive: true,
+        });
+      }
+    }
+  }
+
+  findNextForm(sourceForm) {
+    let forms = document.querySelectorAll("squirm-inal-form");
+    let isNext = false;
+    for(let form of forms) {
+      if(isNext) {
+        return form;
+      }
+      if(form === sourceForm) {
+        isNext = true;
+      }
+    }
   }
 }
 
