@@ -209,7 +209,9 @@ class SquirminalForm extends HTMLElement {
     if(!labelText) {
       throw new Error("Missing `label` attribute on the <squirm-inal-form> element.");
     }
-    label.appendChild(document.createTextNode(labelText));
+    let labelSpan = document.createElement("span");
+    labelSpan.appendChild(document.createTextNode(labelText));
+    label.appendChild(labelSpan);
     form.appendChild(label);
 
     if(this.hasAttribute(this.attr.target)) {

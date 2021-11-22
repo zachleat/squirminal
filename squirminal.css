@@ -9,21 +9,27 @@
 
 :root {
   --sq-font: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
+  --sq-cursor: #30c8c9;
+  --sq-focus-ring: #30c8c9;
 }
-squirm-inal[clone] {
+squirm-inal[clone],
+squirm-inal[js-only] {
   display: none;
 }
-.js squirm-inal[clone] {
+.js squirm-inal[clone],
+.js squirm-inal[js-only] {
   display: initial;
 }
 
+squirm-inal,
+squirm-inal-form {
+  margin-top: .5em;
+  margin-bottom: .5em;
+}
 squirm-inal {
-  --sq-cursor: #30c8c9;
   display: block;
   white-space: pre-wrap;
   font-family: var(--sq-font);
-  margin-top: .5em;
-  margin-bottom: .5em;
 }
 .squirminal-content {
   line-height: 1.4;
@@ -52,32 +58,43 @@ squirm-inal-form {
 }
 squirm-inal-form label {
   display: flex;
+  gap: .5em;
+  flex-wrap: wrap;
   align-items: center;
   white-space: nowrap;
 }
 squirm-inal-form input {
+  flex-basis: 16em;
+  flex-grow: 1;
   background-color: inherit;
   color: inherit;
   font-family: inherit;
   line-height: inherit;
   font-size: 1em;
-  border: none;
   width: 100%;
-  margin-left: .2em;
-  /* outline: none; */
-  border: 1px solid;
+  outline-color: pink;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: .25em;
+  padding: .25em;
+}
+@supports (box-shadow: none) {
+  squirm-inal-form input:focus {
+    box-shadow: 0 0 1px 2px var(--sq-focus-ring);
+    outline: 2px var(--sq-focus-ring);
+    caret-color: var(--sq-focus-ring);
+  }
 }
 squirm-inal-form input[readonly] {
-  border: none;
+  border-color: transparent;
 }
 squirm-inal-form form.command-running {
   visibility: hidden;
 }
-squirm-inal-form label:before {
+squirm-inal-form label span:after {
   content: ">";
   font-weight: bold;
   font-family: system-ui, sans-serif;
   color: #32c8c9;
   display: inline-block;
-  margin-right: .5em;
+  margin-left: .5em;
 }
