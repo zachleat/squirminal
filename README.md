@@ -31,6 +31,7 @@ npm install @zachleat/squirminal
 * Works without JavaScript (shows content)
 * Blinking cursor via `<squirm-inal cursor>`
 * Autoplay via `<squirm-inal autoplay>`
+* Works with text nodes inside any arbitrary HTML content.
 * Play/pause/reset button
 * TODO: keyboard activation
 

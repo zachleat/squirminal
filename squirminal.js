@@ -7,6 +7,7 @@ class Squirminal extends HTMLElement {
       min: 20,
       max: 60
     };
+    this.flatDepth = 1000;
 
     this.attr = {
       cursor: "cursor",
@@ -25,17 +26,76 @@ class Squirminal extends HTMLElement {
     };
   }
 
+  _serializeContent(node, selector = []) {
+    if(node.nodeType === 3) {
+      let text = node.nodeValue;
+      node.nodeValue = "";
+
+      // this represents characters that need to be added to the page.
+      return {
+        text: text.split(""),
+        selector: selector
+      };
+    }
+
+    let tag = node.tagName.toLowerCase();
+
+    let content = [];
+    let j = 0;
+    for(let child of Array.from(node.childNodes)) {
+      content.push(this._serializeContent(child, [...selector, j]));
+      j++;
+    }
+
+    return content;
+  }
+
+  getNode(target, selector) {
+    for(let childIndex of selector) {
+      target = target.childNodes[childIndex];
+    }
+    return target;
+  }
+
+  addCharacters(target, characterCount = 1) {
+    for(let entry of this.serialized) {
+      let str = [];
+      while(entry.text.length && characterCount-- > 0) {
+        str.push(entry.text.shift());
+      }
+
+      let targetNode = this.getNode(target, entry.selector);
+      targetNode.nodeValue += str.join("");
+
+      if(characterCount === 0) break;
+    }
+
+  }
+
+  hasQueue() {
+    for(let entry of this.serialized) {
+      if(entry.text.length > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   connectedCallback() {
     // quit early when reduced motion
     if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
-    let originalText = this.innerText;
+    this.originalContent = this.cloneNode(true);
+    this.serialized = this._serializeContent(this).flat(this.flatDepth);
 
     this.init();
-    this.setupProps(originalText);
+    this.setupProps();
 
+    // TODO this is not ideal because the intersectionRatio is based on the empty terminal, not the
+    // final animated version. So it’s tiny when empty and when the IntersectionRatio is 1 it may
+    // animate off the bottom of the viewport.
     if(this.hasAttribute(this.attr.autoplay)) {
       this._whenVisible(this, (isVisible) => {
         if(isVisible) {
@@ -55,25 +115,23 @@ class Squirminal extends HTMLElement {
     }
   }
 
-  setupProps(text) {
+  setupProps() {
     this.paused = true;
-    this.originalText = text.trim();
-    this.queue = this.originalText.split("");
 
     this.toggleButton = this.querySelector(":scope button");
     this.content = this.querySelector(`.${this.classes.content}`);
   }
 
-  reset() {
-    this.paused = true;
-    this.setButtonText(this.toggleButton, "Play");
-    this.queue = this.originalText.split("");
-    this.content.innerHTML = "";
-  }
-
   init() {
-    // clear it out
-    this.innerHTML = "";
+    // Add content div
+    let content = document.createElement("div");
+    content.classList.add(this.classes.content);
+
+    // add non-text that have already been emptied by the serializer
+    for(let child of Array.from(this.childNodes)) {
+      content.appendChild(child);
+    }
+    this.appendChild(content);
 
     // Play/pause button
     if(this.hasAttribute(this.attr.buttons)) {
@@ -84,11 +142,6 @@ class Squirminal extends HTMLElement {
       })
       this.appendChild(toggleBtn);
     }
-
-    // Add content div
-    let content = document.createElement("div");
-    content.classList.add(this.classes.content);
-    this.appendChild(content);
   }
 
   setButtonText(button, text) {
@@ -105,7 +158,11 @@ class Squirminal extends HTMLElement {
     }
   
     return new IntersectionObserver(entries => {
-      entries.forEach(entry => callback(entry.isIntersecting))
+      entries.forEach(entry => {
+        callback(entry.isIntersecting)
+      });
+    }, {
+      threshold: 1
     }).observe(el);
   }
 
@@ -124,7 +181,7 @@ class Squirminal extends HTMLElement {
 
   play() {
     this.paused = false;
-    if(this.queue.length) {
+    if(this.hasQueue()) {
       this.setButtonText(this.toggleButton, "Pause");
       this.dispatchEvent(new CustomEvent(this.events.start));
     }
@@ -137,27 +194,19 @@ class Squirminal extends HTMLElement {
       return;
     }
 
-    if(!this.queue.length) {
+    if(!this.hasQueue()) {
       this.pause();
       this.dispatchEvent(new CustomEvent(this.events.end));
     }
 
     // show a random chunk size between min/max
-    let add = [];
     let chunkSize = Math.round(Math.max(this.chunkSize.min, Math.random() * this.chunkSize.max + 1));
-    for(let j = 0, k = chunkSize; j<k; j++) {
-      let character = this.queue.shift();
-      add.push(character);
-    }
-    
-    let strAdded = add.join("");
-    this.content.appendChild(document.createTextNode(strAdded));
+    this.addCharacters(this.content, chunkSize);
 
     this.dispatchEvent(new CustomEvent(this.events.frameAdded));
 
     // the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
-    let nonwhitespaceCharacters = strAdded.replace(/\s/gi, "");
-    let delay = nonwhitespaceCharacters.length * (1/this.speed);
+    let delay = chunkSize * (1/this.speed);
     setTimeout(() => {
       requestAnimationFrame(() => this.showMore());
     }, delay);
@@ -165,8 +214,8 @@ class Squirminal extends HTMLElement {
 
   clone() {
     let cloned = this.cloneNode();
-    // restore text
-    cloned.innerText = this.originalText;
+    // restart from scratch
+    cloned.innerHTML = this.originalContent.innerHTML;
     cloned.removeAttribute(this.attr.clone);
     return cloned;
   }
