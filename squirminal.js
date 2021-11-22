@@ -249,7 +249,6 @@ class SquirminalForm extends HTMLElement {
 
     // if a fallback or invalid selector matches, we don’t move to the next question.
     let isFirstChoiceCommand = !!terminal;
-    console.log( { isFirstChoiceCommand } );
     let targetFallbackSelector = this.getAttribute(this.attr.fallback);
     if(!terminal && targetFallbackSelector) {
       terminal = document.querySelector(targetFallbackSelector + valueSuffix);
@@ -293,13 +292,15 @@ class SquirminalForm extends HTMLElement {
       // after clone
       this.commandInput.setAttribute("readonly", "readonly");
 
-      if(nextInput) {
+      if(nextInput || nextForm) {
         cloned.addEventListener("squirminal.frameadded", () => {
-          nextInput.scrollIntoView();
+          (nextInput || nextForm).scrollIntoView();
         }, {
           passive: true,
         });
+      }
 
+      if(nextInput) {
         cloned.addEventListener("squirminal.end", () => {
           // TODO get rid of this
           setTimeout(() => {
