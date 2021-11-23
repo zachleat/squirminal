@@ -340,15 +340,28 @@ class SquirminalForm extends HTMLElement {
     summary.click();
   }
 
+  normalizeAlias(value) {
+    let aliases = {
+      yes: "y",
+      no: "n",
+      "?": "help",
+    };
+
+    if(aliases[value]) {
+      return aliases[value];
+    }
+    return value;
+  }
+
   playTarget() {
-    let value = (this.commandInput.value || "").toLowerCase();
+    let value = this.normalizeAlias((this.commandInput.value || "").toLowerCase());
     let valueSuffix = `-${value || "default"}`;
 
     let targetSelector = this.getAttribute(this.attr.target);
-    let terminal = document.querySelector(targetSelector + valueSuffix);
-
+    let terminal = document.querySelector(`#${targetSelector}${valueSuffix}`);
+    
     if(!terminal && value) {
-      terminal = document.querySelector(targetSelector + "-invalid");
+      terminal = document.querySelector(`#${targetSelector}-invalid`);
     }
 
     if(terminal) {
@@ -371,7 +384,6 @@ class SquirminalGroup extends HTMLElement {
     }
 
     let terminal = cmd.clone();
-    // terminal.setAttribute("id", id + "-" + terminal.getAttribute("id"))
     terminal.removeAttribute("id");
     terminal.removeAttribute("show-button");
     terminal.setAttribute("autoplay", "");
