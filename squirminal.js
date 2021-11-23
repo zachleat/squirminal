@@ -1,11 +1,17 @@
 class Squirminal extends HTMLElement {
+  static define(tagName) {
+    if("customElements" in window) {
+      window.customElements.define(tagName || "squirm-inal", Squirminal);
+    }
+  }
+
   constructor() {
     super();
 
-    this.speed = 1.5; // higher is faster, 3 is about the fastest it can go.
+    this.speed = 2.5; // higher is faster, 3 is about the fastest it can go.
     this.chunkSize = {
-      min: 20,
-      max: 60
+      min: 40,
+      max: 100
     };
     this.flatDepth = 1000;
 
@@ -13,7 +19,7 @@ class Squirminal extends HTMLElement {
       cursor: "cursor",
       autoplay: "autoplay",
       buttons: "buttons",
-      clone: "clone",
+      global: "global",
     };
     this.classes = {
       showCursor: "squirminal-cursor-show",
@@ -37,8 +43,6 @@ class Squirminal extends HTMLElement {
         selector: selector
       };
     }
-
-    let tag = node.tagName.toLowerCase();
 
     let content = [];
     let j = 0;
@@ -69,7 +73,6 @@ class Squirminal extends HTMLElement {
 
       if(characterCount === 0) break;
     }
-
   }
 
   hasQueue() {
@@ -87,11 +90,7 @@ class Squirminal extends HTMLElement {
       return;
     }
 
-    this.originalContent = this.cloneNode(true);
-    this.serialized = this._serializeContent(this).flat(this.flatDepth);
-
     this.init();
-    this.setupProps();
 
     // TODO this is not ideal because the intersectionRatio is based on the empty terminal, not the
     // final animated version. So it’s tiny when empty and when the IntersectionRatio is 1 it may
@@ -115,33 +114,52 @@ class Squirminal extends HTMLElement {
     }
   }
 
-  setupProps() {
-    this.paused = true;
-
-    this.toggleButton = this.querySelector(":scope button");
-    this.content = this.querySelector(`.${this.classes.content}`);
-  }
-
   init() {
-    // Add content div
-    let content = document.createElement("div");
-    content.classList.add(this.classes.content);
+    this.paused = true;
+    this.originalContent = this.cloneNode(true);
+    this.serialized = this._serializeContent(this).flat(this.flatDepth);
 
-    // add non-text that have already been emptied by the serializer
-    for(let child of Array.from(this.childNodes)) {
-      content.appendChild(child);
+    // Add content div
+    this.content = this.querySelector(`.${this.classes.content}`);
+    if(!this.content) {
+      let content = document.createElement("div");
+      content.classList.add(this.classes.content);
+  
+      // add non-text that have already been emptied by the serializer
+      for(let child of Array.from(this.childNodes)) {
+        content.appendChild(child);
+      }
+      this.appendChild(content);
+      this.content = content;
     }
-    this.appendChild(content);
 
     // Play/pause button
-    if(this.hasAttribute(this.attr.buttons)) {
+    this.toggleButton = this.querySelector(":scope button");
+    if(this.hasAttribute(this.attr.buttons) && !this.toggleButton) {
       let toggleBtn = document.createElement("button");
       toggleBtn.innerText = "Play";
       toggleBtn.addEventListener("click", e => {
         this.toggle();
       })
       this.appendChild(toggleBtn);
+      this.toggleButton = toggleBtn;
     }
+  }
+
+  onreveal(callback) {
+    this.addEventListener(this.events.frameAdded, callback, {
+      passive: true,
+    });
+    this.addEventListener(this.events.end, () => {
+      this.removeEventListener(this.events.frameAdded, callback);
+    });
+  }
+
+  onend(callback) {
+    this.addEventListener(this.events.end, callback, {
+      passive: true,
+      once: true,
+    });
   }
 
   setButtonText(button, text) {
@@ -207,28 +225,40 @@ class Squirminal extends HTMLElement {
 
     // the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
     let delay = chunkSize * (1/this.speed);
-    setTimeout(() => {
+    if(delay > 16) {
+      setTimeout(() => {
+        requestAnimationFrame(() => this.showMore());
+      }, delay);
+    } else {
       requestAnimationFrame(() => this.showMore());
-    }, delay);
+    }
+  }
+
+  isGlobalCommand() {
+    return this.hasAttribute(this.attr.global);
   }
 
   clone() {
     let cloned = this.cloneNode();
     // restart from scratch
     cloned.innerHTML = this.originalContent.innerHTML;
-    cloned.removeAttribute(this.attr.clone);
     return cloned;
   }
 }
 
 class SquirminalForm extends HTMLElement {
+  static define(tagName) {
+    if("customElements" in window) {
+      window.customElements.define(tagName || "squirm-inal-form", SquirminalForm);
+    }
+  }
+
   constructor() {
     super();
+
     this.attr = {
       autofocus: "autofocus",
       target: "target",
-      fallback: "target-fallback",
-      invalid: "target-invalid",
     };
   }
 
@@ -252,18 +282,25 @@ class SquirminalForm extends HTMLElement {
   addForm() {
     let form = document.createElement("form");
     this.form = form;
-    
+
     let label = document.createElement("label");
     let labelText = this.getAttribute("label");
     if(!labelText) {
       throw new Error("Missing `label` attribute on the <squirm-inal-form> element.");
     }
-    let labelSpan = document.createElement("span");
-    labelSpan.appendChild(document.createTextNode(labelText));
-    label.appendChild(labelSpan);
+
+    let hasTarget = this.hasAttribute(this.attr.target);
+
+    if(hasTarget) {
+      let labelSpan = document.createElement("span");
+      labelSpan.appendChild(document.createTextNode(labelText));
+      label.appendChild(labelSpan);
+    } else {
+      label.appendChild(document.createTextNode(labelText));
+    }
     form.appendChild(label);
 
-    if(this.hasAttribute(this.attr.target)) {
+    if(hasTarget) {
       let command = document.createElement("input");
       this.commandInput = command;
 
@@ -281,88 +318,64 @@ class SquirminalForm extends HTMLElement {
   clone() {
     let cloned = this.cloneNode();
     cloned.setupProps();
-
     return cloned;
   }
 
-  on(el, name, fn) {
-    el.addEventListener(name, fn, {
-      passive: true,
-    })
+  focusToInput() {
+    if(this.commandInput) {
+      this.commandInput.focus();
+    }
+  }
+
+  setValue(value = "") {
+    this.commandInput.value = value.toLowerCase();
+    if(value) {
+      this.commandInput.setAttribute("readonly", "");
+    }
+  }
+
+  clickButton(terminal) {
+    let details = terminal.closest("details");
+    let summary = details.querySelector(":scope > summary");
+    summary.click();
   }
 
   playTarget() {
     let value = (this.commandInput.value || "").toLowerCase();
-    let valueSuffix = (value ? `-${value}` : "");
-    
+    let valueSuffix = `-${value || "default"}`;
+
     let targetSelector = this.getAttribute(this.attr.target);
     let terminal = document.querySelector(targetSelector + valueSuffix);
 
-    // if a fallback or invalid selector matches, we don’t move to the next question.
-    let isFirstChoiceCommand = !!terminal;
-    let targetFallbackSelector = this.getAttribute(this.attr.fallback);
-    if(!terminal && targetFallbackSelector) {
-      terminal = document.querySelector(targetFallbackSelector + valueSuffix);
+    if(!terminal && value) {
+      terminal = document.querySelector(targetSelector + "-invalid");
     }
 
-    let targetInvalidSelector = this.getAttribute(this.attr.invalid);
-    if(!terminal && value && targetInvalidSelector) {
-      terminal = document.querySelector(targetInvalidSelector);
+    if(terminal) {
+      this.clickButton(terminal);
+    }
+  }
+}
+
+class SquirminalGroup extends HTMLElement {
+  static define(tagName) {
+    if("customElements" in window) {
+      window.customElements.define(tagName || "squirm-inal-group", SquirminalGroup);
+    }
+  }
+
+  static fetchGlobalCommand(id) {
+    let cmd = document.getElementById(id);
+    if(!cmd) {
+      throw new Error("Could not find `id` for global command:" + id)
     }
 
-    if(!terminal) {
-      return;
-    }
-
-    let cloned = terminal.clone();
-
-    if(cloned) {
-      let nextForm = this.findNextForm(this);
-      // TODO if no nextForm, we’re at the end.
-      nextForm.parentNode.insertBefore(cloned, nextForm);
-      cloned.play();
-
-      // blur on the old question
-      if(document.activeElement) {
-        document.activeElement.blur();
-      }
-
-      let nextInput;
-      if(isFirstChoiceCommand) {
-        nextForm.classList.add("active");
-
-        // Move to next question  
-        nextInput = nextForm.querySelector(":scope input");
-      } else {
-        // Keep the current question active
-        let clonedForm = this.clone();
-        this.parentNode.insertBefore(clonedForm, nextForm);
-        nextInput = clonedForm.querySelector(":scope input");
-      }
-
-      // after clone
-      this.commandInput.setAttribute("readonly", "readonly");
-
-      if(nextInput || nextForm) {
-        cloned.addEventListener("squirminal.frameadded", () => {
-          (nextInput || nextForm).scrollIntoView();
-        }, {
-          passive: true,
-        });
-      }
-
-      if(nextInput) {
-        cloned.addEventListener("squirminal.end", () => {
-          // TODO get rid of this
-          setTimeout(() => {
-            nextInput.focus();
-          }, 100);
-        }, {
-          once: true,
-          passive: true,
-        });
-      }
-    }
+    let terminal = cmd.clone();
+    // terminal.setAttribute("id", id + "-" + terminal.getAttribute("id"))
+    terminal.removeAttribute("id");
+    terminal.removeAttribute("show-button");
+    terminal.setAttribute("autoplay", "");
+    return terminal;
   }
 
   findNextForm(sourceForm) {
@@ -377,9 +390,116 @@ class SquirminalForm extends HTMLElement {
       }
     }
   }
+
+  openForm(form) {
+    let details = form.closest("details");
+    if(details) {
+      details.open = true;
+    }
+  }
+
+  onclick(target) {
+    let summary = target.closest("summary");
+    if(!summary) {
+      return;
+    }
+
+    let form = this.previousElementSibling;
+    let details = summary.parentNode;
+
+    if(details) {
+      // if a global button, append it and play (but don’t select or move on)
+      let globalTargetId = details.getAttribute(this.attr.globalCommand);
+      if(globalTargetId) {
+        let currentInputValue = form.commandInput.value;
+        let clonedForm = form.clone();
+        this.parentNode.insertBefore(clonedForm, form);
+        if(summary.innerText.toLowerCase() === "invalid") {
+          clonedForm.setValue(currentInputValue);
+        } else {
+          clonedForm.setValue(summary.innerText);
+        }
+
+        form.setValue("");
+
+        let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
+        terminal.onreveal(() => {
+          form.scrollIntoView();
+        });
+        terminal.onend(() => {
+          form.focusToInput();
+        });
+
+        // insert before the form
+        this.parentNode.insertBefore(terminal, form);
+        return;
+      } else {
+        // not a global command
+        let terminal = details.querySelector(":scope > squirm-inal")
+        let nextForm = this.findNextForm(form);
+        if(nextForm) {
+          this.openForm(nextForm);
+  
+          terminal.onreveal(() => {
+            nextForm.scrollIntoView();
+          });
+          terminal.onend(() => {
+            nextForm.focusToInput();
+          });
+        }
+      }
+    }
+
+    if(this.selected) {
+      e.preventDefault();
+      return;
+    }
+
+    // set form input
+    if(form) {
+      form.setValue(summary.innerText);
+    }
+
+    // hides all sibling <summary> elements via CSS
+    this.classList.add("readonly");
+    this.selected = true;
+  }
+
+  connectedCallback() {
+    this.attr = {
+      globalCommand: "data-squirminal-global-command",
+    };
+
+    this.selected = false;
+    this.classList.add("enhanced");
+
+    this.addEventListener("click", e => {
+      this.onclick(e.target);
+    });
+
+    // Attach global commands
+    let globalCommands = document.querySelectorAll("squirm-inal[global][show-button]");
+    for(let cmd of globalCommands) {
+      let parentDetails = cmd.closest("details");
+      if(!parentDetails) {
+        throw new Error("Missing parent <details> for global command.");
+      }
+
+      let text = parentDetails.querySelector(":scope summary").innerText;
+      let cmdId = cmd.getAttribute("id");
+      let details = document.createElement("details");
+      details.setAttribute("id", `${this.getAttribute("id")}-${cmdId}`);
+      details.setAttribute("data-squirminal-global-command", cmdId);
+
+      let summary = document.createElement("summary");
+      summary.innerText = text;
+      details.appendChild(summary);
+
+      this.appendChild(details);
+    }
+  }
 }
 
-if("customElements" in window) {
-  window.customElements.define("squirm-inal", Squirminal);
-  window.customElements.define("squirm-inal-form", SquirminalForm);
-}
+Squirminal.define();
+SquirminalForm.define();
+SquirminalGroup.define();

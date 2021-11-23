@@ -8,3 +8,31 @@ body {
 	overflow-y: scroll;
 	overflow-anchor: none;
 }
+
+details {
+	margin: .5em 0;
+}
+details summary {
+	padding: .5em;
+  border-radius: .5em;
+	cursor: default;
+}
+/* .js details[open] summary {
+	float: left;
+	clear: left;
+} */
+squirm-inal-group details {
+	margin: 0;
+}
+squirm-inal-group details summary {
+	border: 1px solid;
+}
+details details {
+	padding: 0 1em;
+}
+squirm-inal-group.enhanced > details {
+  padding: 0;
+}
+squirm-inal-group.readonly details summary {
+	border-color: rgba(255,255,255,.2);
+}

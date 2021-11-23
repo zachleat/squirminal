@@ -12,22 +12,29 @@
   --sq-cursor: #30c8c9;
   --sq-focus-ring: #30c8c9;
 }
-squirm-inal[clone],
-squirm-inal[js-only] {
+.sq-nojs-hide {
+  margin: 0;
+}
+.sq-nojs-hide,
+squirm-inal[js-show] {
   display: none;
 }
-.js squirm-inal[clone],
-.js squirm-inal[js-only] {
-  display: initial;
+.js .sq-nojs-hide,
+.js squirm-inal[js-show] {
+  display: block;
+}
+
+.js .sq-js-hide {
+  display: none;
 }
 
 squirm-inal,
 squirm-inal-form {
+  display: block;
   margin-top: .5em;
   margin-bottom: .5em;
 }
 squirm-inal {
-  display: block;
   white-space: pre-wrap;
   font-family: var(--sq-font);
 }
@@ -49,15 +56,9 @@ squirm-inal {
   animation: squirminal-blink 1s infinite steps(2, start);
 }
 
+/* Drive a question from a form */
 squirm-inal-form {
   font-family: var(--sq-font);
-}
-.js squirm-inal-form {
-  display: none;
-}
-.js squirm-inal-form.active,
-.js squirm-inal-form[autofocus] {
-  display: block;
 }
 squirm-inal-form label {
   display: flex;
@@ -75,7 +76,6 @@ squirm-inal-form input {
   line-height: inherit;
   font-size: 1em;
   width: 100%;
-  outline-color: pink;
   border: 1px solid rgba(255,255,255,.2);
   border-radius: .25em;
   padding: .25em;
@@ -100,4 +100,19 @@ squirm-inal-form label span:after {
   color: #32c8c9;
   display: inline-block;
   margin-left: .5em;
+}
+
+/* Drive a question from a group of details */
+squirm-inal-group.enhanced summary {
+  display: inline-block;
+}
+squirm-inal-group.enhanced summary::-webkit-details-marker {
+  display: none;
+}
+squirm-inal-group.enhanced:not(.readonly) {
+  display: inline-flex;
+  gap: .5em;
+}
+squirm-inal-group.readonly details summary {
+  display: none;
 }
