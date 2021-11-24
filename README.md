@@ -40,5 +40,8 @@ npm install @zachleat/squirminal
 * [MIT](./LICENSE)
 
 <!--
-TODO focus jump bug when margin-bottom: 120vh
+TODO
+* focus jump bug when margin-bottom: 120vh
+* skip to question #___, save state for previous questions
+* hide the next form until the animation finishes
 -->
