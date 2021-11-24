@@ -1,0 +1,45 @@
+/* Drive a question from a form */
+squirm-inal-form {
+  font-family: var(--sq-font);
+}
+squirm-inal-form label {
+  display: flex;
+  gap: .5em;
+  flex-wrap: wrap;
+  align-items: center;
+  white-space: nowrap;
+}
+squirm-inal-form input {
+  flex-basis: 16em;
+  flex-grow: 1;
+  background-color: inherit;
+  color: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  font-size: 1em;
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: .25em;
+  padding: .25em;
+}
+@supports (box-shadow: none) {
+  squirm-inal-form input:focus {
+    box-shadow: 0 0 1px 2px var(--sq-focus-ring);
+    outline: 2px var(--sq-focus-ring);
+    caret-color: var(--sq-focus-ring);
+  }
+}
+squirm-inal-form input[readonly] {
+  border-color: transparent;
+}
+squirm-inal-form form.command-running {
+  visibility: hidden;
+}
+squirm-inal-form label span:after {
+  content: ">";
+  font-weight: bold;
+  font-family: system-ui, sans-serif;
+  color: #32c8c9;
+  display: inline-block;
+  margin-left: .5em;
+}
