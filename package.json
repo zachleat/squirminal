@@ -1,7 +1,7 @@
 {
   "name": "@zachleat/squirminal",
   "version": "1.0.0",
-  "description": "The squirminal is a fake antique terminal web component ",
+  "description": "Squirminal incrementally reveals text inside any arbitrary DOM element structure.",
   "main": "squirminal.js",
   "publishConfig": {
     "access": "public"
