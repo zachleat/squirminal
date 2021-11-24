@@ -12,6 +12,17 @@
   --sq-cursor: #30c8c9;
   --sq-focus-ring: #30c8c9;
 }
+.js .sq-visually-hidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap; /* 1 */
+  width: 1px;
+}
 .sq-nojs-hide {
   margin: 0;
 }
@@ -28,6 +39,19 @@ squirm-inal[js-show] {
   display: none;
 }
 
+/* Disabled details */
+.js details[disabled] > summary {
+  display: block;
+  pointer-events: none;
+}
+.js details[disabled] > summary::-webkit-details-marker {
+  display: none;
+}
+.js details[disabled]:not([open]) {
+  display: none;
+}
+
+/* Squirminals */
 squirm-inal,
 squirm-inal-form {
   display: block;
@@ -35,7 +59,6 @@ squirm-inal-form {
   margin-bottom: .5em;
 }
 squirm-inal {
-  white-space: pre-wrap;
   font-family: var(--sq-font);
 }
 .squirminal-content {
@@ -103,8 +126,14 @@ squirm-inal-form label span:after {
 }
 
 /* Drive a question from a group of details */
+squirm-inal-group summary {
+  padding: .5em;
+  cursor: default;
+  border: 1px solid;
+}
 squirm-inal-group.enhanced summary {
   display: inline-block;
+  border-radius: .5em;
 }
 squirm-inal-group.enhanced summary::-webkit-details-marker {
   display: none;
@@ -115,4 +144,15 @@ squirm-inal-group.enhanced:not(.readonly) {
 }
 squirm-inal-group.readonly details summary {
   display: none;
+}
+[data-squirminal-global-command="invalid"] summary {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap; /* 1 */
+  width: 1px;
 }

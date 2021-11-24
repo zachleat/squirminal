@@ -321,6 +321,12 @@ class SquirminalForm extends HTMLElement {
     return cloned;
   }
 
+  blur() {
+    if(document.activeElement) {
+      document.activeElement.blur();
+    }
+  }
+
   focusToInput() {
     if(this.commandInput) {
       this.commandInput.focus();
@@ -329,9 +335,9 @@ class SquirminalForm extends HTMLElement {
 
   setValue(value = "") {
     this.commandInput.value = value.toLowerCase();
-    if(value) {
-      this.commandInput.setAttribute("readonly", "");
-    }
+  }
+  setReadonly() {
+    this.commandInput.setAttribute("readonly", "");
   }
 
   clickButton(terminal) {
@@ -431,15 +437,16 @@ class SquirminalGroup extends HTMLElement {
         } else {
           clonedForm.setValue(summary.innerText);
         }
+        clonedForm.blur();
+        clonedForm.setReadonly();
 
         form.setValue("");
+        form.focusToInput();
 
         let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
+
         terminal.onreveal(() => {
-          form.scrollIntoView();
-        });
-        terminal.onend(() => {
-          form.focusToInput();
+          form.scrollIntoView(false);
         });
 
         // insert before the form
@@ -451,12 +458,10 @@ class SquirminalGroup extends HTMLElement {
         let nextForm = this.findNextForm(form);
         if(nextForm) {
           this.openForm(nextForm);
+          nextForm.focusToInput();
   
           terminal.onreveal(() => {
-            nextForm.scrollIntoView();
-          });
-          terminal.onend(() => {
-            nextForm.focusToInput();
+            nextForm.scrollIntoView(false);
           });
         }
       }
@@ -469,6 +474,7 @@ class SquirminalGroup extends HTMLElement {
 
     // set form input
     if(form) {
+      form.setReadonly();
       form.setValue(summary.innerText);
     }
 

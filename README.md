@@ -38,3 +38,7 @@ npm install @zachleat/squirminal
 ## Credits
 
 * [MIT](./LICENSE)
+
+<!--
+TODO focus jump bug when margin-bottom: 120vh
+-->
