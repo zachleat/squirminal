@@ -43,7 +43,7 @@ class Squirminal extends HTMLElement {
         selector: selector
       };
     } else if(node.nodeType === 1) {
-      if(node.tagName.toLowerCase() !== "squirm-inal") {
+      if(node.tagName.toLowerCase() !== "squirm-inal" && node.innerText) {
         node.classList.add("sq-empty");
       }
     }
