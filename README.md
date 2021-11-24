@@ -35,6 +35,11 @@ npm install @zachleat/squirminal
 * Play/pause/reset button
 * TODO: keyboard activation
 
+### Optional Extensions
+
+* `<squirm-inal-group>` uses `<details>` to drive a progressively enhanced clickable command structure.
+* `<squirm-inal-form>` uses a form text input to drive which terminals are animated.
+
 ## Credits
 
 * [MIT](./LICENSE)
