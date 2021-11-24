@@ -42,8 +42,11 @@ class Squirminal extends HTMLElement {
         text: text.split(""),
         selector: selector
       };
+    } else if(node.nodeType === 1) {
+      if(node.tagName.toLowerCase() !== "squirm-inal") {
+        node.classList.add("sq-empty");
+      }
     }
-
     let content = [];
     let j = 0;
     for(let child of Array.from(node.childNodes)) {
@@ -61,6 +64,17 @@ class Squirminal extends HTMLElement {
     return target;
   }
 
+  removeEmptyClass(node) {
+    if(node && node.nodeValue) {
+      while(node) {
+        if(node.classList) {
+          node.classList.remove("sq-empty");
+        }
+        node = node.parentNode;
+      }
+    }
+  }
+
   addCharacters(target, characterCount = 1) {
     for(let entry of this.serialized) {
       let str = [];
@@ -70,6 +84,7 @@ class Squirminal extends HTMLElement {
 
       let targetNode = this.getNode(target, entry.selector);
       targetNode.nodeValue += str.join("");
+      this.removeEmptyClass(targetNode);
 
       if(characterCount === 0) break;
     }

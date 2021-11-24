@@ -64,7 +64,7 @@ squirm-inal {
 .squirminal-content {
   line-height: 1.4;
 }
-.squirminal-content :empty {
+.squirminal-content .sq-empty {
   display: none;
 }
 /* Cursor */
