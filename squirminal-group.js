@@ -31,11 +31,28 @@ class SquirminalGroup extends HTMLElement {
     }
   }
 
-  openForm(form) {
-    let details = form.closest("details");
-    if(details) {
-      details.open = true;
-    }
+  during(form, terminal, isGlobalCommand) {
+    if(!form) return;
+
+    form.classList.add("sq-active");
+
+    terminal.onreveal(() => {
+      // form.scrollIntoView(false);
+      this.scrollIntoView(false);
+    });
+
+    terminal.onend(() => {
+      // only open 
+      if(!isGlobalCommand) {
+        let details = form.closest("details");
+        if(details) {
+          details.open = true;
+        }
+      }
+
+      form.classList.remove("sq-active");
+      form.focusToInput();
+    });
   }
 
   onclick(target) {
@@ -63,46 +80,19 @@ class SquirminalGroup extends HTMLElement {
         clonedForm.setReadonly();
 
         form.setValue("");
-        form.focusToInput();
 
         let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
-
-        // TODO make this better
-        terminal.onstart(() => {
-          // TODO hide group’s summary buttons
-          // form.style.display = "none";
-        });
-        terminal.onend(() => {
-          // TODO show group’s summary buttons
-          // form.style.display = "block";
-        });
-        terminal.onreveal(() => {
-          form.scrollIntoView(false);
-        });
+        this.during(form, terminal, true);
 
         // insert before the form
         this.parentNode.insertBefore(terminal, form);
         return;
       } else {
         // not a global command
-        let terminal = details.querySelector(":scope > squirm-inal")
+        let terminal = details.querySelector(":scope > squirm-inal");
         let nextForm = this.findNextForm(form);
         if(nextForm) {
-          this.openForm(nextForm);
-          nextForm.focusToInput();
-  
-          // TODO make this better
-          terminal.onstart(() => {
-            // TODO hide group’s summary buttons
-            // nextForm.style.display = "none";
-          });
-          terminal.onend(() => {
-            // TODO show group’s summary buttons
-            // nextForm.style.display = "block";
-          });
-          terminal.onreveal(() => {
-            nextForm.scrollIntoView(false);
-          });
+          this.during(nextForm, terminal, false);
         }
       }
     }

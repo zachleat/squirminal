@@ -29,3 +29,9 @@ squirm-inal-group.readonly details summary {
   white-space: nowrap; /* 1 */
   width: 1px;
 }
+
+
+.sq-active,
+.sq-active ~ squirm-inal-group {
+  visibility: hidden;
+}
