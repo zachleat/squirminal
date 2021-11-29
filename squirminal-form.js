@@ -23,7 +23,7 @@ class SquirminalForm extends HTMLElement {
     }
 
     if(this.commandInput && this.hasAttribute(this.attr.autofocus)) {
-      this.commandInput.focus();
+      setTimeout(() => this.commandInput.focus());
     }
 
     this.form.addEventListener("submit", e => {
