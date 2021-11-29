@@ -1,12 +1,3 @@
-@keyframes squirminal-blink {
-	0% {
-		background-color: var(--sq-cursor);
-	}
-	100% {
-		background-color: transparent;
-	}
-}
-
 :root {
   --sq-font: SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
   --sq-cursor: #30c8c9;
@@ -68,6 +59,15 @@ squirm-inal {
   display: none;
 }
 /* Cursor */
+/* @keyframes squirminal-blink {
+	0% {
+		background-color: var(--sq-cursor);
+	}
+	100% {
+		background-color: transparent;
+	}
+} */
+
 .squirminal-cursor-show .squirminal-content:after {
   content: '';
   display: inline-block;
@@ -76,5 +76,5 @@ squirm-inal {
   margin-left: 0.2em;
   background-color: var(--sq-cursor);
   vertical-align: text-bottom;
-  animation: squirminal-blink 1s infinite steps(2, start);
+  /* animation: squirminal-blink 1s infinite steps(2, start); */
 }
