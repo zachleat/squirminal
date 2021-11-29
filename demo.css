@@ -12,6 +12,6 @@ pre,
 code {
 	font-family: inherit;
 }
-.demo-pre {
+pre {
 	white-space: pre-wrap;
 }
