@@ -13,7 +13,6 @@ squirm-inal-group.enhanced summary::-webkit-details-marker {
 }
 squirm-inal-group.enhanced:not(.readonly) {
   display: inline-flex;
-  gap: .5em;
 }
 squirm-inal-group.readonly details summary {
   display: none;

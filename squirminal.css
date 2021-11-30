@@ -30,18 +30,6 @@ squirm-inal[js-show] {
   display: none;
 }
 
-/* Disabled details */
-.js details[disabled] > summary {
-  display: block;
-  pointer-events: none;
-}
-.js details[disabled] > summary::-webkit-details-marker {
-  display: none;
-}
-.js details[disabled]:not([open]) {
-  display: none;
-}
-
 /* Squirminals */
 squirm-inal,
 squirm-inal-form {
