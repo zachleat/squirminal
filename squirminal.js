@@ -127,6 +127,14 @@ class Squirminal extends HTMLElement {
         this.classList.remove(this.classes.showCursor);
       });
     }
+
+
+    let href = this.getAttribute("href");
+    if(href) {
+      this.addEventListener("squirminal.end", () => {
+        window.location.href = href;
+      });
+    }
   }
 
   init() {

@@ -26,14 +26,27 @@ class SquirminalForm extends HTMLElement {
       setTimeout(() => this.commandInput.focus());
     }
 
-    this.form.addEventListener("submit", e => {
-      e.preventDefault();
-      this.playTarget();
-    });
+    if(!this.form.hasAttribute("action")) {
+      this.form.addEventListener("submit", e => {
+        e.preventDefault();
+        this.playTarget();
+      });
+    }
   }
   
   addForm() {
     let form = document.createElement("form");
+
+    let method = this.getAttribute("method");
+    if(method) {
+      form.setAttribute("method", method)
+    }
+
+    let action = this.getAttribute("action");
+    if(action) {
+      form.setAttribute("action", action);
+    }
+
     this.form = form;
 
     let label = document.createElement("label");
@@ -58,6 +71,11 @@ class SquirminalForm extends HTMLElement {
       this.commandInput = command;
 
       label.appendChild(command);
+    }
+
+    // append any child content of this element to the form (allows you to add your own buttons or hidden form elements)
+    for(let node of Array.from(this.children)) {
+      form.appendChild(node);
     }
     
     this.appendChild(form);
