@@ -1,6 +1,6 @@
 {
   "name": "@zachleat/squirminal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Squirminal incrementally reveals text inside any arbitrary DOM element structure.",
   "main": "squirminal.js",
   "publishConfig": {
