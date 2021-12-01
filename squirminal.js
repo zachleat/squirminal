@@ -8,10 +8,10 @@ class Squirminal extends HTMLElement {
   constructor() {
     super();
 
-    this.speed = .5; // higher is faster, 3 is about the fastest it can go.
+    this.speed = 1.5; // higher is faster, 3 is about the fastest it can go.
     this.chunkSize = {
-      min: 50,
-      max: 100
+      min: 5,
+      max: 30
     };
     this.flatDepth = 1000;
 
