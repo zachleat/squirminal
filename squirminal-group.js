@@ -114,18 +114,22 @@ class SquirminalGroup extends HTMLElement {
       // if a global button, append it and play (but don’t select or move on)
       let globalTargetId = details.getAttribute(this.attr.globalCommand);
       if(globalTargetId) {
-        let currentInputValue = form.commandInput.value;
+        let hasInput = !!form.commandInput;
+        let currentInputValue = hasInput ? form.commandInput.value : "";
         let clonedForm = form.clone();
         this.parentNode.insertBefore(clonedForm, form);
-        if(value === "invalid") {
-          clonedForm.setValue(currentInputValue);
-        } else {
-          clonedForm.setValue(summary.innerText);
-        }
-        clonedForm.blur();
-        clonedForm.setReadonly();
 
-        form.setValue("");
+        if(hasInput) {
+          if(value === "invalid") {
+            clonedForm.setValue(currentInputValue);
+          } else {
+            clonedForm.setValue(summary.innerText);
+          }
+          clonedForm.blur();
+          clonedForm.setReadonly();
+
+          form.setValue("");
+        }
 
         let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
         this.transitionTo(form, terminal, fromUserInteraction);
