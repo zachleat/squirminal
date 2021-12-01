@@ -18,101 +18,6 @@ class SquirminalGroup extends HTMLElement {
     return terminal;
   }
 
-  findNextForm(sourceForm) {
-    let forms = document.querySelectorAll("squirm-inal-form");
-    let isNext = false;
-    for(let form of forms) {
-      if(isNext) {
-        return form;
-      }
-      if(form === sourceForm) {
-        isNext = true;
-      }
-    }
-  }
-
-  during(form, terminal, isGlobalCommand) {
-    if(!form) return;
-
-    form.classList.add("sq-active");
-
-    terminal.onreveal(() => {
-      // form.scrollIntoView(false);
-      this.scrollIntoView(false);
-    });
-
-    terminal.onend(() => {
-      // only open 
-      if(!isGlobalCommand) {
-        let details = form.closest("details");
-        if(details) {
-          details.open = true;
-        }
-      }
-
-      form.classList.remove("sq-active");
-      form.focusToInput();
-    });
-  }
-
-  onclick(target) {
-    let summary = target.closest("summary");
-    if(!summary) {
-      return;
-    }
-
-    let form = this.previousElementSibling;
-    let details = summary.parentNode;
-
-    if(details) {
-      // if a global button, append it and play (but don’t select or move on)
-      let globalTargetId = details.getAttribute(this.attr.globalCommand);
-      if(globalTargetId) {
-        let currentInputValue = form.commandInput.value;
-        let clonedForm = form.clone();
-        this.parentNode.insertBefore(clonedForm, form);
-        if(summary.innerText.toLowerCase() === "invalid") {
-          clonedForm.setValue(currentInputValue);
-        } else {
-          clonedForm.setValue(summary.innerText);
-        }
-        clonedForm.blur();
-        clonedForm.setReadonly();
-
-        form.setValue("");
-
-        let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
-        this.during(form, terminal, true);
-
-        // insert before the form
-        this.parentNode.insertBefore(terminal, form);
-        return;
-      } else {
-        // not a global command
-        let terminal = details.querySelector(":scope > squirm-inal");
-        let nextForm = this.findNextForm(form);
-        if(nextForm) {
-          this.during(nextForm, terminal, false);
-        }
-      }
-    }
-
-    if(this.selected) {
-      e.preventDefault();
-      return;
-    }
-
-    // set form input
-    if(form) {
-      form.setReadonly();
-      form.setValue(summary.innerText);
-    }
-
-    // hides all sibling <summary> elements via CSS
-    this.classList.add("readonly");
-    this.selected = true;
-  }
-
   connectedCallback() {
     this.attr = {
       globalCommand: "data-squirminal-global-command",
@@ -122,7 +27,8 @@ class SquirminalGroup extends HTMLElement {
     this.classList.add("enhanced");
 
     this.addEventListener("click", e => {
-      this.onclick(e.target);
+      let summary = e.target.closest("summary");
+      this.activate(summary);
     });
 
     // Attach global commands
@@ -145,6 +51,165 @@ class SquirminalGroup extends HTMLElement {
 
       this.appendChild(details);
     }
+
+    this.restore();
+
+    // if ?reset query parameter is active, then reset all the persisted values.
+    SquirminalGroup.resetAll();
+  }
+
+  findNextForm(sourceForm) {
+    let forms = document.querySelectorAll("squirm-inal-form");
+    let isNext = false;
+    for(let form of forms) {
+      if(isNext) {
+        return form;
+      }
+      if(form === sourceForm) {
+        isNext = true;
+      }
+    }
+  }
+
+  transitionTo(form, terminal, fromUserInteraction) {
+    if(!form) return;
+
+    form.classList.add("sq-active");
+
+    if(!fromUserInteraction) {
+      terminal.pause();
+      terminal.skip();
+    }
+
+    terminal.onreveal(() => {
+      // form.scrollIntoView(false);
+      this.scrollIntoView(false);
+    });
+
+    terminal.onend(() => {
+      let isGlobalCommand = terminal.hasAttribute("global");
+      // open the details if it’s not a global command
+      if(!isGlobalCommand) {
+        let details = form.closest("details");
+        if(details) {
+          details.open = true;
+        }
+      }
+
+      form.classList.remove("sq-active");
+      form.focusToInput();
+    });
+  }
+
+  activate(summary, fromUserInteraction = true) {
+    if(!summary) {
+      return;
+    }
+
+    let value = summary.innerText.toLowerCase();
+    let form = this.previousElementSibling;
+    let details = summary.parentNode;
+
+    if(details) {
+      // if a global button, append it and play (but don’t select or move on)
+      let globalTargetId = details.getAttribute(this.attr.globalCommand);
+      if(globalTargetId) {
+        let currentInputValue = form.commandInput.value;
+        let clonedForm = form.clone();
+        this.parentNode.insertBefore(clonedForm, form);
+        if(value === "invalid") {
+          clonedForm.setValue(currentInputValue);
+        } else {
+          clonedForm.setValue(summary.innerText);
+        }
+        clonedForm.blur();
+        clonedForm.setReadonly();
+
+        form.setValue("");
+
+        let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
+        this.transitionTo(form, terminal, fromUserInteraction);
+
+        // insert before the form
+        this.parentNode.insertBefore(terminal, form);
+        return;
+      } else {
+        // not a global command
+        let terminal = details.querySelector(":scope > squirm-inal");
+
+        if(fromUserInteraction) {
+          this.persist(terminal.getAttribute("id"));
+        }
+
+        let nextForm = this.findNextForm(form);
+        if(nextForm) {
+          this.transitionTo(nextForm, terminal, fromUserInteraction);
+        }
+      }
+    }
+
+    if(this.selected) {
+      e.preventDefault();
+      return;
+    }
+
+    // set form input
+    if(form) {
+      form.setReadonly();
+      form.setValue(summary.innerText);
+    }
+
+    // hides all sibling <summary> elements via CSS
+    this.classList.add("readonly");
+    this.selected = true;
+  }
+
+  get storageKey() {
+    if(!this._storageKey) {
+      this._storageKey = "squirminal-group-" + this.getAttribute("id");
+    }
+    return this._storageKey;
+  }
+
+  static resetAll() {
+    let url = new URL(document.location.href);
+    if(!url.searchParams.has("reset")) {
+      return;
+    }
+
+    for(let j = 0, k = localStorage.length; j<k; j++) {
+      let key = localStorage.key(j);
+      if(key && key.startsWith("squirminal-group-")) {
+        localStorage.removeItem(key);
+      }
+    }
+
+    // reset your session, redirect to the page.
+    url.searchParams.delete("reset");
+    window.location.href = url.toString();
+  }
+
+  persist(terminalId) {
+    localStorage.setItem(this.storageKey, terminalId);
+  }
+
+  restore() {
+    let targetId = this.getPersistedValue();
+    if(!targetId) {
+      return;
+    }
+
+    let terminal = document.getElementById(targetId);
+
+    let details = terminal.closest("details");
+    details.open = true;
+
+    let summary = details.querySelector(":scope > summary");
+    this.activate(summary, false);
+  }
+
+  getPersistedValue() {
+    return localStorage.getItem(this.storageKey);
   }
 }
 

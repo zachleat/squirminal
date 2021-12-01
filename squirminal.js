@@ -8,10 +8,10 @@ class Squirminal extends HTMLElement {
   constructor() {
     super();
 
-    this.speed = 1.5; // higher is faster, 3 is about the fastest it can go.
+    this.speed = .5; // higher is faster, 3 is about the fastest it can go.
     this.chunkSize = {
-      min: 5,
-      max: 30
+      min: 50,
+      max: 100
     };
     this.flatDepth = 1000;
 
@@ -157,15 +157,28 @@ class Squirminal extends HTMLElement {
     }
 
     // Play/pause button
-    this.toggleButton = this.querySelector(":scope button");
+    this.toggleButton = this.querySelector(":scope button[data-sq-toggle]");
     if(this.hasAttribute(this.attr.buttons) && !this.toggleButton) {
       let toggleBtn = document.createElement("button");
       toggleBtn.innerText = "Play";
+      toggleBtn.setAttribute("data-sq-toggle", "");
       toggleBtn.addEventListener("click", e => {
         this.toggle();
       })
       this.appendChild(toggleBtn);
       this.toggleButton = toggleBtn;
+    }
+
+    this.skipButton = this.querySelector(":scope button[data-sq-skip]");
+    if(this.hasAttribute(this.attr.buttons) && !this.skipButton) {
+      let skipBtn = document.createElement("button");
+      skipBtn.innerText = "Skip";
+      skipBtn.setAttribute("data-sq-skip", "");
+      skipBtn.addEventListener("click", e => {
+        this.skip();
+      })
+      this.appendChild(skipBtn);
+      this.skipButton = skipBtn;
     }
   }
 
@@ -227,17 +240,24 @@ class Squirminal extends HTMLElement {
     this.setButtonText(this.toggleButton, "Play");
   }
 
-  play() {
+  skip() {
+    this.play({
+      chunkSize: this.originalContent.innerHTML.length,
+      delay: 0
+    });
+  }
+
+  play(overrides = {}) {
     this.paused = false;
     if(this.hasQueue()) {
       this.setButtonText(this.toggleButton, "Pause");
       this.dispatchEvent(new CustomEvent(this.events.start));
     }
 
-    requestAnimationFrame(() => this.showMore());
+    requestAnimationFrame(() => this.showMore(overrides));
   }
 
-  showMore() {
+  showMore(overrides = {}) {
     if(this.paused) {
       return;
     }
@@ -245,22 +265,23 @@ class Squirminal extends HTMLElement {
     if(!this.hasQueue()) {
       this.pause();
       this.dispatchEvent(new CustomEvent(this.events.end));
+      return;
     }
 
     // show a random chunk size between min/max
-    let chunkSize = Math.round(Math.max(this.chunkSize.min, Math.random() * this.chunkSize.max + 1));
+    let chunkSize = overrides.chunkSize || Math.round(Math.max(this.chunkSize.min, Math.random() * this.chunkSize.max + 1));
     this.addCharacters(this.content, chunkSize);
 
     this.dispatchEvent(new CustomEvent(this.events.frameAdded));
 
     // the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
-    let delay = chunkSize * (1/this.speed);
+    let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/this.speed);
     if(delay > 16) {
       setTimeout(() => {
-        requestAnimationFrame(() => this.showMore());
+        requestAnimationFrame(() => this.showMore(overrides));
       }, delay);
     } else {
-      requestAnimationFrame(() => this.showMore());
+      requestAnimationFrame(() => this.showMore(overrides));
     }
   }
 
