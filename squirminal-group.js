@@ -132,14 +132,19 @@ class SquirminalGroup extends HTMLElement {
         }
 
         let terminal = SquirminalGroup.fetchGlobalCommand(globalTargetId);
+        
         this.transitionTo(form, terminal, fromUserInteraction);
-
+        
         // insert before the form
         this.parentNode.insertBefore(terminal, form);
+
+        // Make sure the global details is in view so that it autoplays
+        details.scrollIntoView();
         return;
       } else {
         // not a global command
         let terminal = details.querySelector(":scope > squirm-inal");
+        details.scrollIntoView();
 
         if(fromUserInteraction) {
           this.persist(terminal.getAttribute("id"));
