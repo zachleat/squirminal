@@ -107,8 +107,8 @@ class SquirminalForm extends HTMLElement {
   setValue(value = "") {
     this.commandInput.value = value.toLowerCase();
   }
-  setReadonly() {
-    this.commandInput.setAttribute("readonly", "");
+  setInactive() {
+    this.commandInput.setAttribute("disabled", "");
   }
 
   clickButton(terminal) {

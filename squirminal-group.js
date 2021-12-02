@@ -126,7 +126,7 @@ class SquirminalGroup extends HTMLElement {
             clonedForm.setValue(summary.innerText);
           }
           clonedForm.blur();
-          clonedForm.setReadonly();
+          clonedForm.setInactive();
 
           form.setValue("");
         }
@@ -164,7 +164,7 @@ class SquirminalGroup extends HTMLElement {
 
     // set form input
     if(form) {
-      form.setReadonly();
+      form.setInactive();
       form.setValue(summary.innerText);
     }
 

@@ -29,9 +29,6 @@ squirm-inal-form input {
     caret-color: var(--sq-focus-ring);
   }
 }
-squirm-inal-form input[readonly] {
-  border-color: transparent;
-}
 squirm-inal-form form.command-running {
   visibility: hidden;
 }
