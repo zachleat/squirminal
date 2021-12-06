@@ -21,6 +21,7 @@ class SquirminalGroup extends HTMLElement {
   connectedCallback() {
     this.attr = {
       globalCommand: "data-squirminal-global-command",
+      doNotRestore: "disable-restore"
     };
 
     this.selected = false;
@@ -202,6 +203,22 @@ class SquirminalGroup extends HTMLElement {
     localStorage.setItem(this.storageKey, terminalId);
   }
 
+  skipRestore(terminal) {
+    let alreadySkipped = false;
+    let terminals = document.querySelectorAll("squirm-inal");
+    for(let entry of terminals) {
+      let skipped = entry.hasAttribute(this.attr.doNotRestore);
+      if(skipped) {
+        alreadySkipped = true;
+      }
+      if(terminal === entry) {
+        break;
+      }
+    }
+
+    return alreadySkipped;
+  }
+
   restore() {
     let targetId = this.getPersistedValue();
     if(!targetId) {
@@ -209,6 +226,9 @@ class SquirminalGroup extends HTMLElement {
     }
 
     let terminal = document.getElementById(targetId);
+    if(this.skipRestore(terminal)) {
+      return;
+    }
 
     let details = terminal.closest("details");
     details.open = true;
