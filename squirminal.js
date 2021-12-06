@@ -183,6 +183,9 @@ class Squirminal extends HTMLElement {
     });
     this.addEventListener(this.events.end, () => {
       this.removeEventListener(this.events.frameAdded, callback);
+    }, {
+      passive: true,
+      once: true,
     });
   }
 
