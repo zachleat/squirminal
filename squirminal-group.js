@@ -21,7 +21,8 @@ class SquirminalGroup extends HTMLElement {
   connectedCallback() {
     this.attr = {
       globalCommand: "data-squirminal-global-command",
-      doNotRestore: "disable-restore"
+      doNotRestore: "disable-restore",
+      skipGlobals: "skip-global-commands",
     };
 
     this.selected = false;
@@ -34,6 +35,7 @@ class SquirminalGroup extends HTMLElement {
 
     // Attach global commands
     let globalCommands = document.querySelectorAll("squirm-inal[global][show-button]");
+    let skip = new Set((this.getAttribute(this.attr.skipGlobals) || "").split(",").filter(entry => entry));
     for(let cmd of globalCommands) {
       let parentDetails = cmd.closest("details");
       if(!parentDetails) {
@@ -42,6 +44,11 @@ class SquirminalGroup extends HTMLElement {
 
       let text = parentDetails.querySelector(":scope summary").innerText;
       let cmdId = cmd.getAttribute("id");
+
+      if(skip.has(cmdId)) {
+        continue;
+      }
+
       let details = document.createElement("details");
       details.setAttribute("id", `${this.getAttribute("id")}-${cmdId}`);
       details.setAttribute("data-squirminal-global-command", cmdId);
