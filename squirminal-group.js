@@ -24,6 +24,10 @@ class SquirminalGroup extends HTMLElement {
       doNotRestore: "disable-restore",
       skipGlobals: "skip-global-commands",
     };
+    this.scrollIntoViewOptions = {
+      block: "end",
+      inline: "start",
+    };
 
     this.selected = false;
     this.classList.add("enhanced");
@@ -90,8 +94,7 @@ class SquirminalGroup extends HTMLElement {
     }
 
     terminal.onreveal(() => {
-      // form.scrollIntoView(false);
-      this.scrollIntoView(false);
+      this.scrollIntoView(this.scrollIntoViewOptions);
     });
 
     terminal.onend(() => {
@@ -147,12 +150,12 @@ class SquirminalGroup extends HTMLElement {
         this.parentNode.insertBefore(terminal, form);
 
         // Make sure the global details is in view so that it autoplays
-        details.scrollIntoView();
+        details.scrollIntoView(this.scrollIntoViewOptions);
         return;
       } else {
         // not a global command
         let terminal = details.querySelector(":scope > squirm-inal");
-        details.scrollIntoView();
+        details.scrollIntoView(this.scrollIntoViewOptions);
 
         if(fromUserInteraction) {
           this.persist(terminal.getAttribute("id"));
