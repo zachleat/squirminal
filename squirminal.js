@@ -100,11 +100,6 @@ class Squirminal extends HTMLElement {
   }
 
   connectedCallback() {
-    // quit early when reduced motion
-    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-
     this.init();
 
     // TODO this is not ideal because the intersectionRatio is based on the empty terminal, not the
@@ -248,6 +243,11 @@ class Squirminal extends HTMLElement {
   }
 
   play(overrides = {}) {
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      overrides.chunkSize = this.originalContent.innerHTML.length;
+      overrides.delay = 0;
+    }
+
     this.paused = false;
     if(this.hasQueue()) {
       this.setButtonText(this.toggleButton, "Pause");
