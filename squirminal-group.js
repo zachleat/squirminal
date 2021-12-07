@@ -23,6 +23,7 @@ class SquirminalGroup extends HTMLElement {
       globalCommand: "data-squirminal-global-command",
       doNotRestore: "disable-restore",
       skipGlobals: "skip-global-commands",
+      scrollMinimum: "scroll-minimum", // only px are supported right now
     };
 
     this.selected = false;
@@ -91,11 +92,12 @@ class SquirminalGroup extends HTMLElement {
 
     // Require a minimum of 100px movement before we actually scroll
     // sq-anchor <div> is optional.
+    let scrollMinimum = parseInt(terminal.getAttribute(this.attr.scrollMinimum) || 60, 10);
     let anchor = document.getElementById("sq-anchor");
     let lastOffset = 0;
     terminal.onreveal(() => {
       let offset = this.offsetTop + this.offsetHeight;
-      if(offset - lastOffset > 100) {
+      if(offset - lastOffset > scrollMinimum) {
         (anchor || this).scrollIntoView(false);
         lastOffset = offset;
       }
