@@ -16,3 +16,8 @@ code {
 pre {
 	white-space: pre-wrap;
 }
+
+.help {
+	font-size: 6px;
+	white-space: pre;
+}

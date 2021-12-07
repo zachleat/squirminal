@@ -89,9 +89,16 @@ class SquirminalGroup extends HTMLElement {
       terminal.skip();
     }
 
+    // Require a minimum of 100px movement before we actually scroll
+    // sq-anchor <div> is optional.
+    let anchor = document.getElementById("sq-anchor");
+    let lastOffset = 0;
     terminal.onreveal(() => {
-      // form.scrollIntoView(false);
-      this.scrollIntoView(false);
+      let offset = this.offsetTop + this.offsetHeight;
+      if(offset - lastOffset > 100) {
+        (anchor || this).scrollIntoView(false);
+        lastOffset = offset;
+      }
     });
 
     terminal.onend(() => {

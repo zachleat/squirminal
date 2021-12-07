@@ -267,6 +267,7 @@ class Squirminal extends HTMLElement {
 
     if(!this.hasQueue()) {
       this.pause();
+      this.dispatchEvent(new CustomEvent(this.events.frameAdded));
       this.dispatchEvent(new CustomEvent(this.events.end));
       return;
     }
