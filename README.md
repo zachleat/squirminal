@@ -33,11 +33,10 @@ npm install @zachleat/squirminal
 * Autoplay via `<squirm-inal autoplay>`
 * Works with text nodes inside any arbitrary HTML content.
 * Play/pause/reset button
-* TODO: keyboard activation
 
 ### Optional Extensions
 
-* `<squirm-inal-group>` uses `<details>` to drive a progressively enhanced clickable command structure.
+* `<squirm-inal-group>` uses `<details>` to drive a progressively enhanced clickable command structure. Persists previous command selections on reload.
 * `<squirm-inal-form>` uses a form text input to drive which terminals are animated.
 
 ## Credits
