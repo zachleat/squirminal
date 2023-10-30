@@ -1,6 +1,6 @@
 # Squirminal
 
-The squirminal is a fake antique terminal web component 
+The squirminal is a fake antique terminal web component
 
 * [Demo](https://squirminal.zachleat.dev/)
 
@@ -28,11 +28,11 @@ npm install @zachleat/squirminal
 ## Features
 
 * Works with `prefers-reduced-motion`
-* Works without JavaScript (shows content)
+* Works without JavaScript (fallback to show content)
 * Blinking cursor via `<squirm-inal cursor>`
-* Autoplay via `<squirm-inal autoplay>`
+* Autoplay (only when visible) via `<squirm-inal autoplay>`
 * Works with text nodes inside any arbitrary HTML content.
-* Play/pause/reset button
+* Play/pause/reset button via `<squirm-inal buttons>`
 
 ### Optional Extensions
 
