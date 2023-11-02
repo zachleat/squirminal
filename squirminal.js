@@ -23,12 +23,6 @@ class Squirminal extends HTMLElement {
 squirm-inal {
 	--sq-cursor: #30c8c9;
 	display: block;
-	margin-top: .5em;
-	margin-bottom: .5em;
-	line-height: 1.4;
-}
-squirm-inal[${Squirminal.attr.dimensions}] {
-	display: block;
 }
 squirm-inal .${Squirminal.classes.emptyNode} {
 	display: none;
