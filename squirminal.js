@@ -11,6 +11,7 @@ class Squirminal extends HTMLElement {
 		buttons: "buttons",
 		global: "global",
 		dimensions: "dimensions",
+		speed: "speed",
 	};
 
 	static classes = {
@@ -42,7 +43,7 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 	vertical-align: text-bottom;
 }`
 
-	static speed = 1.5; // higher is faster, 3 is about the fastest it can go.
+	static defaultSpeed = 2; // higher is faster, 10 is about the fastest it can go.
 
 	static chunkSize = {
 		min: 5,
@@ -321,8 +322,11 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 
 		this.dispatchEvent(new CustomEvent(Squirminal.events.frameAdded));
 
+		let speed = parseFloat(this.getAttribute(Squirminal.attr.speed) || Squirminal.defaultSpeed);
+		let normalizedSpeed = speed * .3; // convert from 0-10 to 0-3
+
 		// the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
-		let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/Squirminal.speed);
+		let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/normalizedSpeed);
 		if(delay > 16) {
 			setTimeout(() => {
 				requestAnimationFrame(() => this.showMore(overrides));
