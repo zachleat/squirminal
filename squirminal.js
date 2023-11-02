@@ -1,304 +1,331 @@
 class Squirminal extends HTMLElement {
-  static define(tagName) {
-    if("customElements" in window) {
-      window.customElements.define(tagName || "squirm-inal", Squirminal);
-    }
-  }
+	static define(tagName) {
+		if("customElements" in window) {
+			window.customElements.define(tagName || "squirm-inal", Squirminal);
+		}
+	}
 
-  constructor() {
-    super();
+	static attr = {
+		cursor: "cursor",
+		autoplay: "autoplay",
+		buttons: "buttons",
+		global: "global",
+	};
 
-    this.speed = 1.5; // higher is faster, 3 is about the fastest it can go.
-    this.chunkSize = {
-      min: 5,
-      max: 30
-    };
-    this.flatDepth = 1000;
+	static classes = {
+		showCursor: "cursor",
+	};
 
-    this.attr = {
-      cursor: "cursor",
-      autoplay: "autoplay",
-      buttons: "buttons",
-      global: "global",
-    };
-    this.classes = {
-      showCursor: "squirminal-cursor-show",
-      content: "squirminal-content",
-    };
-    this.events = {
-      start: "squirminal.start",
-      end: "squirminal.end",
-      frameAdded: "squirminal.frameadded",
-    };
-  }
+	static css = `
+squirm-inal {
+	--sq-cursor: #30c8c9;
+	display: block;
+	margin-top: .5em;
+	margin-bottom: .5em;
+	line-height: 1.4;
+}
+squirm-inal .sq-empty {
+	display: none;
+}
+squirm-inal.${Squirminal.classes.showCursor}:after {
+	content: '';
+	display: inline-block;
+	width: 0.7em;
+	height: 1.2em;
+	margin-left: 0.2em;
+	background-color: var(--sq-cursor);
+	vertical-align: text-bottom;
+}`
 
-  _serializeContent(node, selector = []) {
-    if(node.nodeType === 3) {
-      let text = node.nodeValue;
-      node.nodeValue = "";
+	static speed = 1.5; // higher is faster, 3 is about the fastest it can go.
 
-      // this represents characters that need to be added to the page.
-      return {
-        text: text.split(""),
-        selector: selector
-      };
-    } else if(node.nodeType === 1) {
-      if(node.tagName.toLowerCase() !== "squirm-inal" && node.innerText) {
-        node.classList.add("sq-empty");
-      }
-    }
-    let content = [];
-    let j = 0;
-    for(let child of Array.from(node.childNodes)) {
-      content.push(this._serializeContent(child, [...selector, j]));
-      j++;
-    }
+	static chunkSize = {
+		min: 5,
+		max: 30
+	};
 
-    return content;
-  }
+	static flatDepth = 1000;
 
-  getNode(target, selector) {
-    for(let childIndex of selector) {
-      target = target.childNodes[childIndex];
-    }
-    return target;
-  }
+	static events = {
+		start: "squirminal.start",
+		end: "squirminal.end",
+		frameAdded: "squirminal.frameadded",
+	};
 
-  removeEmptyClass(node) {
-    if(node && node.nodeValue) {
-      while(node) {
-        if(node.classList) {
-          node.classList.remove("sq-empty");
-        }
-        node = node.parentNode;
-      }
-    }
-  }
+	static _needsCss = true;
 
-  addCharacters(target, characterCount = 1) {
-    for(let entry of this.serialized) {
-      let str = [];
-      while(entry.text.length && characterCount-- > 0) {
-        str.push(entry.text.shift());
-      }
+	_serializeContent(node, selector = []) {
+		if(node.nodeType === 3) {
+			let text = node.nodeValue;
+			node.nodeValue = "";
 
-      let targetNode = this.getNode(target, entry.selector);
-      targetNode.nodeValue += str.join("");
-      this.removeEmptyClass(targetNode);
+			// this represents characters that need to be added to the page.
+			return {
+				text: text.split(""),
+				selector: selector
+			};
+		} else if(node.nodeType === 1) {
+			if(node.tagName.toLowerCase() !== "squirm-inal" && node.innerText) {
+				node.classList.add("sq-empty");
+			}
+		}
+		let content = [];
+		let j = 0;
+		for(let child of Array.from(node.childNodes)) {
+			content.push(this._serializeContent(child, [...selector, j]));
+			j++;
+		}
 
-      if(characterCount === 0) break;
-    }
-  }
+		return content;
+	}
 
-  hasQueue() {
-    for(let entry of this.serialized) {
-      if(entry.text.length > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
+	getNode(target, selector) {
+		for(let childIndex of selector) {
+			target = target.childNodes[childIndex];
+		}
+		return target;
+	}
 
-  connectedCallback() {
-    this.init();
+	removeEmptyClass(node) {
+		if(node && node.nodeValue) {
+			while(node) {
+				if(node.classList) {
+					node.classList.remove("sq-empty");
+				}
+				node = node.parentNode;
+			}
+		}
+	}
 
-    // TODO this is not ideal because the intersectionRatio is based on the empty terminal, not the
-    // final animated version. So it’s tiny when empty and when the IntersectionRatio is 1 it may
-    // animate off the bottom of the viewport.
-    if(this.hasAttribute(this.attr.autoplay)) {
-      this._whenVisible(this, (isVisible) => {
-        if(isVisible) {
-          this.play();
-        }
-      });
-    }
+	addCharacters(target, characterCount = 1) {
+		for(let entry of this.serialized) {
+			let str = [];
+			while(entry.text.length && characterCount-- > 0) {
+				str.push(entry.text.shift());
+			}
 
-    if(this.hasAttribute(this.attr.cursor)) {
-      this.addEventListener("squirminal.start", () => {
-        this.classList.add(this.classes.showCursor);
-      });
+			let targetNode = this.getNode(target, entry.selector);
+			targetNode.nodeValue += str.join("");
+			this.removeEmptyClass(targetNode);
 
-      this.addEventListener("squirminal.end", () => {
-        this.classList.remove(this.classes.showCursor);
-      });
-    }
+			if(characterCount === 0) break;
+		}
+	}
+
+	hasQueue() {
+		for(let entry of this.serialized) {
+			if(entry.text.length > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	connectedCallback() {
+		if (!("replaceSync" in CSSStyleSheet.prototype) || this.shadowRoot) {
+			return;
+		}
+
+		Squirminal._addCss();
+
+		this.init();
+
+		// TODO this is not ideal because the intersectionRatio is based on the empty terminal, not the
+		// final animated version. So it’s tiny when empty and when the IntersectionRatio is 1 it may
+		// animate off the bottom of the viewport.
+		if(this.hasAttribute(Squirminal.attr.autoplay)) {
+			this._whenVisible(this, (isVisible) => {
+				if(isVisible) {
+					this.play();
+				}
+			});
+		}
+
+		if(this.hasAttribute(Squirminal.attr.cursor)) {
+			this.addEventListener("squirminal.start", () => {
+				this.classList.add(Squirminal.classes.showCursor);
+			});
+
+			this.addEventListener("squirminal.end", () => {
+				this.classList.remove(Squirminal.classes.showCursor);
+			});
+		}
 
 
-    let href = this.getAttribute("href");
-    if(href) {
-      this.addEventListener("squirminal.end", () => {
-        window.location.href = href;
-      });
-    }
-  }
+		let href = this.getAttribute("href");
+		if(href) {
+			this.addEventListener("squirminal.end", () => {
+				window.location.href = href;
+			});
+		}
+	}
 
-  init() {
-    this.paused = true;
-    this.originalContent = this.cloneNode(true);
-    this.serialized = this._serializeContent(this).flat(this.flatDepth);
+	static _addCss() {
+		if(!Squirminal._needsCss) {
+			return;
+		}
 
-    // Add content div
-    this.content = this.querySelector(`.${this.classes.content}`);
-    if(!this.content) {
-      let content = document.createElement("div");
-      content.classList.add(this.classes.content);
-  
-      // add non-text that have already been emptied by the serializer
-      for(let child of Array.from(this.childNodes)) {
-        content.appendChild(child);
-      }
-      this.appendChild(content);
-      this.content = content;
-    }
+		Squirminal._needsCss = false;
+		let sheet = new CSSStyleSheet();
+		sheet.replaceSync(Squirminal.css);
+		document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+	}
 
-    // Play/pause button
-    this.toggleButton = this.querySelector(":scope button[data-sq-toggle]");
-    if(this.hasAttribute(this.attr.buttons) && !this.toggleButton) {
-      let toggleBtn = document.createElement("button");
-      toggleBtn.innerText = "Play";
-      toggleBtn.setAttribute("data-sq-toggle", "");
-      toggleBtn.addEventListener("click", e => {
-        this.toggle();
-      })
-      this.appendChild(toggleBtn);
-      this.toggleButton = toggleBtn;
-    }
+	init() {
+		this.paused = true;
+		this.originalContent = this.cloneNode(true);
+		this.serialized = this._serializeContent(this).flat(Squirminal.flatDepth);
 
-    this.skipButton = this.querySelector(":scope button[data-sq-skip]");
-    if(this.hasAttribute(this.attr.buttons) && !this.skipButton) {
-      let skipBtn = document.createElement("button");
-      skipBtn.innerText = "Skip";
-      skipBtn.setAttribute("data-sq-skip", "");
-      skipBtn.addEventListener("click", e => {
-        this.skip();
-      })
-      this.appendChild(skipBtn);
-      this.skipButton = skipBtn;
-    }
-  }
+		// add non-text that have already been emptied by the serializer
+		for(let child of Array.from(this.childNodes)) {
+			this.appendChild(child);
+		}
 
-  onreveal(callback) {
-    this.addEventListener(this.events.frameAdded, callback, {
-      passive: true,
-    });
-    this.addEventListener(this.events.end, () => {
-      this.removeEventListener(this.events.frameAdded, callback);
-    }, {
-      passive: true,
-      once: true,
-    });
-  }
+		// Play/pause button
+		this.toggleButton = this.querySelector("button[data-sq-toggle]");
+		if(this.hasAttribute(Squirminal.attr.buttons) && !this.toggleButton) {
+			let toggleBtn = document.createElement("button");
+			toggleBtn.innerText = "Play";
+			toggleBtn.setAttribute("data-sq-toggle", "");
+			toggleBtn.addEventListener("click", e => {
+				this.toggle();
+				this.toggleButton?.remove();
+				this.skipButton?.remove();
+			})
+			this.appendChild(toggleBtn);
+			this.toggleButton = toggleBtn;
+		}
 
-  onstart(callback) {
-    this.addEventListener(this.events.start, callback, {
-      passive: true,
-      once: true,
-    });
-  }
+		this.skipButton = this.querySelector("button[data-sq-skip]");
+		if(this.hasAttribute(Squirminal.attr.buttons) && !this.skipButton) {
+			let skipBtn = document.createElement("button");
+			skipBtn.innerText = "Skip";
+			skipBtn.setAttribute("data-sq-skip", "");
+			skipBtn.addEventListener("click", e => {
+				this.skip();
+				this.toggleButton?.remove();
+				this.skipButton?.remove();
+			})
+			this.appendChild(skipBtn);
+			this.skipButton = skipBtn;
+		}
+	}
 
-  onend(callback) {
-    this.addEventListener(this.events.end, callback, {
-      passive: true,
-      once: true,
-    });
-  }
+	onreveal(callback) {
+		this.addEventListener(Squirminal.events.frameAdded, callback, {
+			passive: true,
+		});
+		this.addEventListener(Squirminal.events.end, () => {
+			this.removeEventListener(Squirminal.events.frameAdded, callback);
+		}, {
+			passive: true,
+			once: true,
+		});
+	}
 
-  setButtonText(button, text) {
-    if(button && text) {
-      button.innerText = text;
-    }
-  }
+	onstart(callback) {
+		this.addEventListener(Squirminal.events.start, callback, {
+			passive: true,
+			once: true,
+		});
+	}
 
-  _whenVisible(el, callback) {
-    if(!('IntersectionObserver' in window)) {
-      // run by default without intersectionobserver
-      callback(undefined);
-      return;
-    }
-  
-    return new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        callback(entry.isIntersecting)
-      });
-    }, {
-      threshold: 1
-    }).observe(el);
-  }
+	onend(callback) {
+		this.addEventListener(Squirminal.events.end, callback, {
+			passive: true,
+			once: true,
+		});
+	}
 
-  toggle() {
-    if(this.paused) {
-      this.play();
-    } else {
-      this.pause();
-    }
-  }
+	setButtonText(button, text) {
+		if(button && text) {
+			button.innerText = text;
+		}
+	}
 
-  pause() {
-    this.paused = true;
-    this.setButtonText(this.toggleButton, "Play");
-  }
+	_whenVisible(el, callback) {
+		if(!('IntersectionObserver' in window)) {
+			// run by default without intersectionobserver
+			callback(undefined);
+			return;
+		}
 
-  skip() {
-    this.play({
-      chunkSize: this.originalContent.innerHTML.length,
-      delay: 0
-    });
-  }
+		return new IntersectionObserver(entries => {
+			entries.forEach(entry => {
+				callback(entry.isIntersecting)
+			});
+		}, {
+			threshold: 1
+		}).observe(el);
+	}
 
-  play(overrides = {}) {
-    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      overrides.chunkSize = this.originalContent.innerHTML.length;
-      overrides.delay = 0;
-    }
+	toggle() {
+		if(this.paused) {
+			this.play();
+		} else {
+			this.pause();
+		}
+	}
 
-    this.paused = false;
-    if(this.hasQueue()) {
-      this.setButtonText(this.toggleButton, "Pause");
-      this.dispatchEvent(new CustomEvent(this.events.start));
-    }
+	pause() {
+		this.paused = true;
+		this.setButtonText(this.toggleButton, "Play");
+	}
 
-    requestAnimationFrame(() => this.showMore(overrides));
-  }
+	skip() {
+		this.play({
+			chunkSize: this.originalContent.innerHTML.length,
+			delay: 0
+		});
+	}
 
-  showMore(overrides = {}) {
-    if(this.paused) {
-      return;
-    }
+	play(overrides = {}) {
+		if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			overrides.chunkSize = this.originalContent.innerHTML.length;
+			overrides.delay = 0;
+		}
 
-    if(!this.hasQueue()) {
-      this.pause();
-      this.dispatchEvent(new CustomEvent(this.events.frameAdded));
-      this.dispatchEvent(new CustomEvent(this.events.end));
-      return;
-    }
+		this.paused = false;
+		if(this.hasQueue()) {
+			this.setButtonText(this.toggleButton, "Pause");
+			this.dispatchEvent(new CustomEvent(Squirminal.events.start));
+		}
 
-    // show a random chunk size between min/max
-    let chunkSize = overrides.chunkSize || Math.round(Math.max(this.chunkSize.min, Math.random() * this.chunkSize.max + 1));
-    this.addCharacters(this.content, chunkSize);
+		requestAnimationFrame(() => this.showMore(overrides));
+	}
 
-    this.dispatchEvent(new CustomEvent(this.events.frameAdded));
+	showMore(overrides = {}) {
+		if(this.paused) {
+			return;
+		}
 
-    // the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
-    let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/this.speed);
-    if(delay > 16) {
-      setTimeout(() => {
-        requestAnimationFrame(() => this.showMore(overrides));
-      }, delay);
-    } else {
-      requestAnimationFrame(() => this.showMore(overrides));
-    }
-  }
+		if(!this.hasQueue()) {
+			this.pause();
+			this.dispatchEvent(new CustomEvent(Squirminal.events.frameAdded));
+			this.dispatchEvent(new CustomEvent(Squirminal.events.end));
+			return;
+		}
 
-  isGlobalCommand() {
-    return this.hasAttribute(this.attr.global);
-  }
+		// show a random chunk size between min/max
+		let chunkSize = overrides.chunkSize || Math.round(Math.max(Squirminal.chunkSize.min, Math.random() * Squirminal.chunkSize.max + 1));
+		this.addCharacters(this, chunkSize);
 
-  clone() {
-    let cloned = this.cloneNode();
-    // restart from scratch
-    cloned.innerHTML = this.originalContent.innerHTML;
-    return cloned;
-  }
+		this.dispatchEvent(new CustomEvent(Squirminal.events.frameAdded));
+
+		// the amount we wait is based on how many non-whitespace characters printed to the screen in this chunk
+		let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/Squirminal.speed);
+		if(delay > 16) {
+			setTimeout(() => {
+				requestAnimationFrame(() => this.showMore(overrides));
+			}, delay);
+		} else {
+			requestAnimationFrame(() => this.showMore(overrides));
+		}
+	}
+
+	isGlobalCommand() {
+		return this.hasAttribute(Squirminal.attr.global);
+	}
 }
 
 Squirminal.define();

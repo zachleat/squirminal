@@ -34,18 +34,6 @@ npm install @zachleat/squirminal
 * Works with text nodes inside any arbitrary HTML content.
 * Play/pause/reset button via `<squirm-inal buttons>`
 
-### Optional Extensions
-
-* `<squirm-inal-group>` uses `<details>` to drive a progressively enhanced clickable command structure. Persists previous command selections on reload.
-* `<squirm-inal-form>` uses a form text input to drive which terminals are animated.
-
 ## Credits
 
 * [MIT](./LICENSE)
-
-<!--
-TODO
-* focus jump bug when margin-bottom: 120vh
-* skip to question #___, save state for previous questions
-* hide the next form until the animation finishes
--->

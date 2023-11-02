@@ -11,7 +11,7 @@ body {
 }
 pre,
 code {
-	font-family: inherit;
+	font-family:  SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace;
 }
 pre {
 	white-space: pre-wrap;
@@ -19,7 +19,10 @@ pre {
 th, td {
 	padding: .25em .5em;
 }
-
+a[href],
+a[href]:visited {
+	color: inherit;
+}
 .help {
 	white-space: pre;
 }
