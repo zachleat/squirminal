@@ -29,6 +29,7 @@ npm install @zachleat/squirminal
 * Autoplay (only when visible) via `<squirm-inal autoplay>`
 * Works with text nodes inside any arbitrary HTML content.
 * Play/pause/reset button via `<squirm-inal buttons>`
+* Use `<squirm-inal dimensions>` to reduce layout shift during animation.
 
 ## Credits
 

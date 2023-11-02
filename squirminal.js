@@ -10,6 +10,7 @@ class Squirminal extends HTMLElement {
 		autoplay: "autoplay",
 		buttons: "buttons",
 		global: "global",
+		dimensions: "dimensions",
 	};
 
 	static classes = {
@@ -24,6 +25,9 @@ squirm-inal {
 	margin-top: .5em;
 	margin-bottom: .5em;
 	line-height: 1.4;
+}
+squirm-inal[${Squirminal.attr.dimensions}] {
+	display: block;
 }
 squirm-inal .${Squirminal.classes.emptyNode} {
 	display: none;
@@ -128,6 +132,10 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		}
 
 		Squirminal._addCss();
+
+		if(this.hasAttribute(Squirminal.attr.dimensions)) {
+			this.style.minHeight = `${this.offsetHeight}px`;
+		}
 
 		this.init();
 
