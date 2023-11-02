@@ -14,6 +14,7 @@ class Squirminal extends HTMLElement {
 
 	static classes = {
 		showCursor: "cursor",
+		emptyNode: "sq-empty",
 	};
 
 	static css = `
@@ -24,7 +25,7 @@ squirm-inal {
 	margin-bottom: .5em;
 	line-height: 1.4;
 }
-squirm-inal .sq-empty {
+squirm-inal .${Squirminal.classes.emptyNode} {
 	display: none;
 }
 squirm-inal.${Squirminal.classes.showCursor}:after {
@@ -66,7 +67,7 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 			};
 		} else if(node.nodeType === 1) {
 			if(node.tagName.toLowerCase() !== "squirm-inal" && node.innerText) {
-				node.classList.add("sq-empty");
+				node.classList.add(Squirminal.classes.emptyNode);
 			}
 		}
 		let content = [];
@@ -90,7 +91,7 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		if(node && node.nodeValue) {
 			while(node) {
 				if(node.classList) {
-					node.classList.remove("sq-empty");
+					node.classList.remove(Squirminal.classes.emptyNode);
 				}
 				node = node.parentNode;
 			}
