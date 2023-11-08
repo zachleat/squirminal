@@ -193,8 +193,6 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 			toggleBtn.setAttribute("data-sq-toggle", "");
 			toggleBtn.addEventListener("click", e => {
 				this.toggle();
-				this.toggleButton?.remove();
-				this.skipButton?.remove();
 			})
 			this.appendChild(toggleBtn);
 			this.toggleButton = toggleBtn;
@@ -207,12 +205,15 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 			skipBtn.setAttribute("data-sq-skip", "");
 			skipBtn.addEventListener("click", e => {
 				this.skip();
-				this.toggleButton?.remove();
-				this.skipButton?.remove();
 			})
 			this.appendChild(skipBtn);
 			this.skipButton = skipBtn;
 		}
+	}
+
+	removeButtons() {
+		this.toggleButton?.remove();
+		this.skipButton?.remove();
 	}
 
 	onreveal(callback) {
@@ -241,12 +242,6 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		});
 	}
 
-	setButtonText(button, text) {
-		if(button && text) {
-			button.innerText = text;
-		}
-	}
-
 	_whenVisible(el, callback) {
 		if(!('IntersectionObserver' in window)) {
 			// run by default without intersectionobserver
@@ -273,7 +268,6 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 
 	pause() {
 		this.paused = true;
-		this.setButtonText(this.toggleButton, "Play");
 	}
 
 	skip() {
@@ -291,15 +285,16 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 
 		this.paused = false;
 		if(this.hasQueue()) {
-			this.setButtonText(this.toggleButton, "Pause");
 			this.dispatchEvent(new CustomEvent(Squirminal.events.start));
 		}
 
-		requestAnimationFrame(() => this.showMore(overrides));
+		this.removeButtons();
+
+		requestAnimationFrame(() => this.showMore(overrides, true));
 	}
 
-	showMore(overrides = {}) {
-		if(this.paused) {
+	showMore(overrides = {}, continuePlaying = false) {
+		if(this.paused && !overrides.force) {
 			return;
 		}
 
@@ -316,6 +311,12 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 
 		this.dispatchEvent(new CustomEvent(Squirminal.events.frameAdded));
 
+		if(continuePlaying) {
+			this.animateNextFrame(chunkSize, overrides);
+		}
+	}
+
+	animateNextFrame(chunkSize, overrides = {}) {
 		let speed = parseFloat(this.getAttribute(Squirminal.attr.speed) || Squirminal.defaultSpeed);
 		let normalizedSpeed = speed * .3; // convert from 0-10 to 0-3
 
@@ -323,10 +324,10 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		let delay = overrides.delay > -1 ? overrides.delay : chunkSize * (1/normalizedSpeed);
 		if(delay > 16) {
 			setTimeout(() => {
-				requestAnimationFrame(() => this.showMore(overrides));
+				requestAnimationFrame(() => this.showMore(overrides, true));
 			}, delay);
 		} else {
-			requestAnimationFrame(() => this.showMore(overrides));
+			requestAnimationFrame(() => this.showMore(overrides, true));
 		}
 	}
 
