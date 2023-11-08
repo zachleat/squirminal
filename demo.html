@@ -8,7 +8,7 @@
 		<link rel="stylesheet" href="demo.css">
 		<script>
 		document.addEventListener("keypress", e => {
-			let els = document.querySelectorAll("squirm-inal[manual-reveal]");
+			let els = document.querySelectorAll("squirm-inal[keypress-reveal]");
 			for(let el of els) {
 				el.removeButtons();
 				el.showMore({ force: true, chunkSize: 4 });
@@ -35,7 +35,7 @@
 		</squirm-inal>
 
 		<h2>This one reveals characters with every keypress (smash your keyboard).</h2>
-		<squirm-inal dimensions manual-reveal>
+		<squirm-inal dimensions keypress-reveal>
 			<pre>
 [2021-11-17T23:41:07.790Z]  "GET /favicon.ico" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36"
 [2021-11-17T23:41:07.791Z]  "GET /favicon.ico" Error (404): "Not found"
