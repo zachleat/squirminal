@@ -15,8 +15,9 @@ class Squirminal extends HTMLElement {
 	};
 
 	static classes = {
-		showCursor: "cursor",
+		showCursor: "show-cursor",
 		emptyNode: "sq-empty",
+		cursor: "sq-cursor",
 	};
 
 	static css = `
@@ -27,14 +28,24 @@ squirm-inal {
 squirm-inal .${Squirminal.classes.emptyNode} {
 	display: none;
 }
-squirm-inal.${Squirminal.classes.showCursor}:after {
-	content: '';
+squirm-inal.${Squirminal.classes.showCursor}.${Squirminal.classes.cursor}:after,
+squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after {
+	content: "";
 	display: inline-block;
 	width: 0.7em;
 	height: 1.2em;
 	margin-left: 0.2em;
 	background-color: var(--sq-cursor);
 	vertical-align: text-bottom;
+	animation: squirminal-blink 1s infinite steps(2, start);
+}
+@keyframes squirminal-blink {
+	0% {
+		background-color: var(--sq-cursor);
+	}
+	100% {
+		background-color: transparent;
+	}
 }`
 
 	static defaultSpeed = 2; // higher is faster, 10 is about the fastest it can go.
@@ -57,6 +68,7 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 	_serializeContent(node, selector = []) {
 		if(node.nodeType === 3) {
 			let text = node.nodeValue;
+			text = text.trim();
 			node.nodeValue = "";
 
 			// this represents characters that need to be added to the page.
@@ -97,6 +109,17 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		}
 	}
 
+	swapCursor(node) {
+		if(!node || !node.classList) {
+			return;
+		}
+		if(this._lastCursor) {
+			this._lastCursor.classList.remove(Squirminal.classes.cursor);
+		}
+		node.classList.add(Squirminal.classes.cursor);
+		this._lastCursor = node;
+	}
+
 	addCharacters(target, characterCount = 1) {
 		for(let entry of this.serialized) {
 			let str = [];
@@ -106,6 +129,10 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 
 			let targetNode = this.getNode(target, entry.selector);
 			targetNode.nodeValue += str.join("");
+
+			if(entry.text.length) {
+				this.swapCursor(targetNode.parentNode);
+			}
 			this.removeEmptyClass(targetNode);
 
 			if(characterCount === 0) break;
@@ -146,6 +173,12 @@ squirm-inal.${Squirminal.classes.showCursor}:after {
 		}
 
 		if(this.hasAttribute(Squirminal.attr.cursor)) {
+			// show until finished
+			if(this.getAttribute(Squirminal.attr.cursor) === "manual") {
+				this.classList.add(Squirminal.classes.showCursor);
+				this.swapCursor(this);
+			}
+
 			this.addEventListener("squirminal.start", () => {
 				this.classList.add(Squirminal.classes.showCursor);
 			});
