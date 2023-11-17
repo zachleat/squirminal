@@ -149,7 +149,7 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 	}
 
 	connectedCallback() {
-		if (!("replaceSync" in CSSStyleSheet.prototype) || this.shadowRoot) {
+		if (!("replaceSync" in CSSStyleSheet.prototype)) {
 			return;
 		}
 
