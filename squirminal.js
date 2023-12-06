@@ -205,7 +205,7 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 		Squirminal._needsCss = false;
 		let sheet = new CSSStyleSheet();
 		sheet.replaceSync(Squirminal.css);
-		document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+		document.adoptedStyleSheets.push(sheet);
 	}
 
 	init() {
