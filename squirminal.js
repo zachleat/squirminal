@@ -65,10 +65,12 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 
 	static _needsCss = true;
 
-	_serializeContent(node, selector = []) {
+	_serializeContent(node, selector = [], shouldTrim = false) {
 		if(node.nodeType === 3) {
 			let text = node.nodeValue;
-			text = text.trim();
+			if(shouldTrim) {
+				text = text.trim();
+			}
 			node.nodeValue = "";
 
 			// this represents characters that need to be added to the page.
@@ -83,8 +85,9 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 		}
 		let content = [];
 		let j = 0;
+
 		for(let child of Array.from(node.childNodes)) {
-			content.push(this._serializeContent(child, [...selector, j]));
+			content.push(this._serializeContent(child, [...selector, j], shouldTrim));
 			j++;
 		}
 
@@ -211,7 +214,9 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 	init() {
 		this.paused = true;
 		this.originalContent = this.cloneNode(true);
-		this.serialized = this._serializeContent(this).flat(Squirminal.flatDepth);
+
+		let isCursorManual = this.getAttribute(Squirminal.attr.cursor) === "manual";
+		this.serialized = this._serializeContent(this, [], isCursorManual).flat(Squirminal.flatDepth);
 
 		// add non-text that have already been emptied by the serializer
 		for(let child of Array.from(this.childNodes)) {
