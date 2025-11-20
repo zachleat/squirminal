@@ -31,6 +31,13 @@ npm install @zachleat/squirminal
 * Play/pause/reset button via `<squirm-inal buttons>`
 * Use `<squirm-inal dimensions>` to reduce layout shift during animation.
 
+## Changelog
+
+A list of breaking changes:
+
+- `v3.0.0` removed option to override tag name in `define()` function (it wasn’t supported in the rest of the code)
+- `v2.0.0` removed extensions `<squirminal-group>` and `<squirminal-form>` to simplify component maintenance
+
 ## Credits
 
 * [MIT](./LICENSE)
