@@ -1,9 +1,13 @@
 class Squirminal extends HTMLElement {
-	static define(tagName) {
-		if("customElements" in window) {
-			window.customElements.define(tagName || "squirm-inal", Squirminal);
+	static define() {
+		if(!("customElements" in window)) {
+			return;
 		}
+		// tagName was removed (it didn’t work anyway)
+		window.customElements.define(this.tagName, Squirminal);
 	}
+
+	static tagName = "squirm-inal";
 
 	static attr = {
 		cursor: "cursor",
@@ -21,15 +25,15 @@ class Squirminal extends HTMLElement {
 	};
 
 	static css = `
-squirm-inal {
+${Squirminal.tagName} {
 	--sq-cursor: #30c8c9;
 	display: block;
 }
-squirm-inal .${Squirminal.classes.emptyNode} {
+${Squirminal.tagName} .${Squirminal.classes.emptyNode} {
 	display: none;
 }
-squirm-inal.${Squirminal.classes.showCursor}.${Squirminal.classes.cursor}:after,
-squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after {
+${Squirminal.tagName}.${Squirminal.classes.showCursor}.${Squirminal.classes.cursor}:after,
+${Squirminal.tagName}.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after {
 	content: "";
 	display: inline-block;
 	width: 0.7em;
@@ -76,13 +80,20 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 			// this represents characters that need to be added to the page.
 			return {
 				text: text.split(""),
-				selector: selector
+				selector,
 			};
 		} else if(node.nodeType === 1) {
-			if(node.tagName.toLowerCase() !== "squirm-inal" && node.innerText) {
+			if(node.tagName.toLowerCase() !== Squirminal.tagName) {
 				node.classList.add(Squirminal.classes.emptyNode);
 			}
+			if(!node.innerText) {
+				return {
+					text: false,
+					selector,
+				}
+			}
 		}
+
 		let content = [];
 		let j = 0;
 
@@ -94,22 +105,28 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 		return content;
 	}
 
-	getNode(target, selector) {
+	static getNode(target, selector) {
 		for(let childIndex of selector) {
 			target = target.childNodes[childIndex];
 		}
 		return target;
 	}
 
-	removeEmptyClass(node) {
-		if(node && node.nodeValue) {
-			while(node) {
-				if(node.classList) {
-					node.classList.remove(Squirminal.classes.emptyNode);
-				}
-				node = node.parentNode;
+	static removeEmpty(node) {
+		while(node) {
+			if(node.classList) {
+				node.classList.remove(this.classes.emptyNode);
 			}
+			if(node.parentNode?.tagName.toLowerCase() === this.tagName) {
+				break;
+			}
+			node = node.parentNode;
 		}
+	}
+
+	static removeAllEmpties(node) {
+		node.classList.remove(this.classes.emptyNode);
+		node.querySelectorAll(`:scope .${this.classes.emptyNode}`).forEach(el => el.classList.remove(this.classes.emptyNode));
 	}
 
 	swapCursor(node) {
@@ -126,19 +143,26 @@ squirm-inal.${Squirminal.classes.showCursor} .${Squirminal.classes.cursor}:after
 	addCharacters(target, characterCount = 1) {
 		for(let entry of this.serialized) {
 			let str = [];
-			while(entry.text.length && characterCount-- > 0) {
+			while(entry.text && entry.text.length > 0 && characterCount-- > 0) {
 				str.push(entry.text.shift());
 			}
 
-			let targetNode = this.getNode(target, entry.selector);
-			targetNode.nodeValue += str.join("");
-
-			if(entry.text.length) {
+			let targetNode = Squirminal.getNode(target, entry.selector);
+			if(entry.text !== false) {
+				targetNode.nodeValue += str.join("");
+			}
+			if(entry.text && entry.text.length > 0) {
 				this.swapCursor(targetNode.parentNode);
 			}
-			this.removeEmptyClass(targetNode);
+			if(entry.text === false) {
+				Squirminal.removeAllEmpties(targetNode);
+			} else {
+				Squirminal.removeEmpty(targetNode);
+			}
 
-			if(characterCount === 0) break;
+			if(characterCount < 0) {
+				break;
+			}
 		}
 	}
 
