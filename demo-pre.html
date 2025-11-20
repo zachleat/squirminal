@@ -12,38 +12,44 @@
 		<h1><code>squirminal</code> Web Component Demo</h1>
 		<p>Go back to the <a href="https://github.com/zachleat/squirminal/">repository on GitHub</a>.</p>
 
+		<hr>
+		<p>Without <code>&lt;squirm-inal&gt;</code>:</p>
+
 		<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">MyComponent</span> <span class="token keyword">extends</span> <span class="token class-name">HTMLElement</span> <span class="token punctuation">{</span>
-			<span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-				<span class="token comment">// web component stuff</span>
-			<span class="token punctuation">}</span>
-		<span class="token punctuation">}</span>
-		<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">"customElements"</span> <span class="token keyword">in</span> window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-			customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">"my-component"</span><span class="token punctuation">,</span> MyComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
-		<span class="token punctuation">}</span></code></pre>
+	<span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">"customElements"</span> <span class="token keyword">in</span> window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">"my-component"</span><span class="token punctuation">,</span> MyComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+
+		<hr>
+		<p><em>With</em> <code>&lt;squirm-inal&gt;</code>:</p>
 
 		<squirm-inal autoplay>
 			<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">MyComponent</span> <span class="token keyword">extends</span> <span class="token class-name">HTMLElement</span> <span class="token punctuation">{</span>
-				<span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-					<span class="token comment">// web component stuff</span>
-				<span class="token punctuation">}</span>
-			<span class="token punctuation">}</span>
-			<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">"customElements"</span> <span class="token keyword">in</span> window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-				customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">"my-component"</span><span class="token punctuation">,</span> MyComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
-			<span class="token punctuation">}</span></code></pre>
+	<span class="token function">connectedCallback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+		<span class="token comment">// web component stuff</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span><span class="token string">"customElements"</span> <span class="token keyword">in</span> window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	customElements<span class="token punctuation">.</span><span class="token function">define</span><span class="token punctuation">(</span><span class="token string">"my-component"</span><span class="token punctuation">,</span> MyComponent<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
 		</squirm-inal>
 	</body>
 </html>
