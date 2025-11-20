@@ -124,8 +124,7 @@ ${Squirminal.tagName}.${Squirminal.classes.showCursor} .${Squirminal.classes.cur
 		}
 	}
 
-	static removeAllEmpties(node) {
-		node.classList.remove(this.classes.emptyNode);
+	static removeAllEmptyChildren(node) {
 		node.querySelectorAll(`:scope .${this.classes.emptyNode}`).forEach(el => el.classList.remove(this.classes.emptyNode));
 	}
 
@@ -155,10 +154,9 @@ ${Squirminal.tagName}.${Squirminal.classes.showCursor} .${Squirminal.classes.cur
 				this.swapCursor(targetNode.parentNode);
 			}
 			if(entry.text === false) {
-				Squirminal.removeAllEmpties(targetNode);
-			} else {
-				Squirminal.removeEmpty(targetNode);
+				Squirminal.removeAllEmptyChildren(targetNode);
 			}
+			Squirminal.removeEmpty(targetNode);
 
 			if(characterCount < 0) {
 				break;
